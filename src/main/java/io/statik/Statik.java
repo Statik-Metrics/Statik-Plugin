@@ -1,6 +1,5 @@
 package io.statik;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONObject;
@@ -22,11 +21,11 @@ public class Statik {
         this.plugin = plugin;
 
         // Configuration
-        final File configFolder = new File(plugin.getDataFolder().getParentFile(), "Statik");
+        final File configFolder = new File(this.plugin.getDataFolder().getParentFile(), "Statik");
 
         if (!configFolder.exists()) {
             configFolder.mkdir();
-            plugin.getLogger().info("Successfully created Statik folder");
+            this.plugin.getLogger().info("Successfully created Statik folder");
         }
 
         final File configFile = new File(configFolder, "config.yml");
@@ -41,7 +40,7 @@ public class Statik {
                 config.set("server-id", UUID.randomUUID().toString());
 
                 config.save(configFile);
-                plugin.getLogger().info("Successfully created config file");
+                this.plugin.getLogger().info("Successfully created config file");
             } catch (Exception ignored) {
             }
         }
@@ -63,8 +62,8 @@ public class Statik {
     }
 
     public void start() {
-        if (!(isEnabled())) {
-            plugin.getLogger().info(collectData().toJSONString());
+        if (!(this.isEnabled())) {
+            this.plugin.getLogger().info(this.collectData().toJSONString());
         }
     }
 
@@ -73,12 +72,12 @@ public class Statik {
     }
 
     private JSONObject collectData() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
         //Plugin Name
-        data.put("pluginName", plugin.getDescription().getName());
+        data.put("pluginName", this.plugin.getDescription().getName());
         //Plugin Version
-        data.put("pluginVersion", plugin.getDescription().getVersion());
+        data.put("pluginVersion", this.plugin.getDescription().getVersion());
 
         //Statik Version
         data.put("statikVersion", STATIK_VERSION);
@@ -92,8 +91,8 @@ public class Statik {
         //System Cores
         data.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
-        String memory = null;
+        final double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
+        final String memory;
         if (mem < 1) {
             memory = "< 1";
         } else {
@@ -102,15 +101,15 @@ public class Statik {
         data.put("systemMemory", memory);
 
         //Server GUID
-        data.put("serverUUID", getUUID());
+        data.put("serverUUID", this.getUUID());
         //Server Mod
-        data.put("serverMod", Bukkit.getVersion().split("-")[1]);
+        data.put("serverMod", this.plugin.getServer().getVersion().split("-")[1]);
         //Server Mod Version
-        data.put("serverMCVersion", Bukkit.getVersion().split("MC: ")[1].replace(")", ""));
+        data.put("serverMCVersion", this.plugin.getServer().getVersion().split("MC: ")[1].replace(")", ""));
         //Get Auth Mode of Server
-        data.put("serverOnline", Bukkit.getServer().getOnlineMode() + "");
+        data.put("serverOnline", this.plugin.getServer().getOnlineMode() + "");
         //Player Count
-        data.put("playerCount", Bukkit.getOnlinePlayers().length);
+        data.put("playerCount", this.plugin.getServer().getOnlinePlayers().length);
 
         return data;
     }
