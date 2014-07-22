@@ -1,3 +1,3 @@
 name: '${project.name}'
-main: io.statik.statik.Main
+main: io.statik.Main
 version: '${project.version}'
