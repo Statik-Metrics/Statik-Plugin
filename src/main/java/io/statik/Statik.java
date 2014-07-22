@@ -1,7 +1,6 @@
 package io.statik;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONObject;
@@ -15,13 +14,56 @@ public class Statik {
     private static final String STATIK_VERSION = "1.0-SNAPSHOT";
 
     private final Plugin plugin;
+    private final boolean enabled;
+    private final boolean debug;
+    private final UUID uuid;
 
     public Statik(Plugin plugin) {
         this.plugin = plugin;
+
+        // Configuration
+        final File configFolder = new File(plugin.getDataFolder().getParentFile(), "Statik");
+
+        if (!configFolder.exists()) {
+            configFolder.mkdir();
+            plugin.getLogger().info("Successfully created Statik folder");
+        }
+
+        final File configFile = new File(configFolder, "config.yml");
+
+        if (!configFile.exists()) {
+            try {
+                configFile.createNewFile();
+
+                final YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+                config.set("opt-out", false);
+                config.set("debug", false);
+                config.set("server-id", UUID.randomUUID().toString());
+
+                config.save(configFile);
+                plugin.getLogger().info("Successfully created config file");
+            } catch (Exception ignored) {
+            }
+        }
+
+        final YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        this.debug = config.getBoolean("debug");
+        this.enabled = !config.getBoolean("opt-out");
+        final String uuidString = config.getString("server-id");
+        if (uuidString.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) {
+            this.uuid = UUID.fromString(uuidString);
+        } else {
+            this.uuid = UUID.randomUUID();
+            config.set("server-id", this.uuid.toString());
+            try {
+                config.save(configFile);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     public void start() {
-        if (!(optOut())) {
+        if (!(isEnabled())) {
             plugin.getLogger().info(collectData().toJSONString());
         }
     }
@@ -60,7 +102,7 @@ public class Statik {
         data.put("systemMemory", memory);
 
         //Server GUID
-        data.put("serverGUID", getGUID());
+        data.put("serverUUID", getUUID());
         //Server Mod
         data.put("serverMod", Bukkit.getVersion().split("-")[1]);
         //Server Mod Version
@@ -76,18 +118,10 @@ public class Statik {
     /**
      * Checks if the server owner has opted out of stat collection.
      *
-     * @return true if the server owner has opted out
+     * @return false if the server owner has opted out
      */
-    private boolean optOut() {
-        FileConfiguration config = new YamlConfiguration();
-
-        try {
-            config.load(getConfigFile());
-        } catch (Exception e) {
-            //Nobody wants to read this
-        }
-
-        return config.getBoolean("opt-out");
+    private boolean isEnabled() {
+        return this.enabled;
     }
 
     /**
@@ -95,16 +129,8 @@ public class Statik {
      *
      * @return true if debugging is enabled
      */
-    private boolean debug() {
-        FileConfiguration config = new YamlConfiguration();
-
-        try {
-            config.load(getConfigFile());
-        } catch (Exception e) {
-            //Nobody wants to read this
-        }
-
-        return config.getBoolean("debug");
+    private boolean isDebugEnabled() {
+        return this.debug;
     }
 
     /**
@@ -112,53 +138,8 @@ public class Statik {
      *
      * @return unique identifier
      */
-    private String getGUID() {
-        FileConfiguration config = new YamlConfiguration();
-
-        try {
-            config.load(getConfigFile());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return config.getString("server-id");
-    }
-
-    /**
-     * Gets the config file.
-     *
-     * @return config file
-     */
-    private File getConfigFile() {
-        final File configFolder = new File(plugin.getDataFolder().getParentFile(), "Statik");
-
-        if (!configFolder.exists()) {
-            configFolder.mkdir();
-            if (debug()) {
-                plugin.getLogger().info("[Debug] Successfully created Statik folder");
-            }
-        }
-
-        final File configFile = new File(configFolder, "config.yml");
-
-        if (!configFile.exists()) {
-            try {
-                configFile.createNewFile();
-
-                final YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-                config.set("opt-out", false);
-                config.set("debug", false);
-                config.set("server-id", UUID.randomUUID().toString());
-
-                config.save(configFile);
-                if (debug()) {
-                    plugin.getLogger().info("[Debug] Successfully created config file");
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        return configFile;
+    private UUID getUUID() {
+        return this.uuid;
     }
 
 }
