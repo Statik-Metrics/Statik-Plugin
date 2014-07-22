@@ -50,7 +50,7 @@ public class Statik {
         //System Cores
         data.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        int GB = 1024 * 1024 * 1024;
+        static int GB = 1024 * 1024 * 1024;
         double mem = (double)Runtime.getRuntime().maxMemory() / GB;
         String memory = null;
         if(mem < 1){
