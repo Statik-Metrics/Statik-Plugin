@@ -1,21 +1,30 @@
 package io.statik;
 
+import com.google.common.collect.ImmutableMap;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.plugin.Plugin;
-import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Statik {
 
     private static final int ONE_GIGABYTE = 1024 * 1024 * 1024;
     private static final String STATIK_VERSION = "1.0-SNAPSHOT";
+    private static final Pattern VERSION_PATTERN = Pattern.compile("\\(MC: ([^\\)]+)\\)");
 
+    private final Gson gson = new Gson();
     private final Plugin plugin;
     private final boolean enabled;
     private final boolean debug;
     private final UUID uuid;
+
+    private final Map<String, Object> unchanging;
 
     public Statik(Plugin plugin) {
         this.plugin = plugin;
@@ -59,37 +68,25 @@ public class Statik {
             } catch (Exception ignored) {
             }
         }
-    }
 
-    public void start() {
-        if (!(this.isEnabled())) {
-            this.plugin.getLogger().info(this.collectData().toJSONString());
-        }
-    }
-
-    public void postData() {
-        //TODO: Post data to report server using POST and no outside dependancies
-    }
-
-    private JSONObject collectData() {
-        final JSONObject data = new JSONObject();
-
+        // Set-once information
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         //Plugin Name
-        data.put("pluginName", this.plugin.getDescription().getName());
+        builder.put("pluginName", this.plugin.getDescription().getName());
         //Plugin Version
-        data.put("pluginVersion", this.plugin.getDescription().getVersion());
+        builder.put("pluginVersion", this.plugin.getDescription().getVersion());
 
         //Statik Version
-        data.put("statikVersion", STATIK_VERSION);
+        builder.put("statikVersion", STATIK_VERSION);
 
         //Java Version
-        data.put("javaVersion", System.getProperty("java.version"));
+        builder.put("javaVersion", System.getProperty("java.version"));
         //Operating System
-        data.put("systemOS", System.getProperty("os.name"));
+        builder.put("systemOS", System.getProperty("os.name"));
         //System Architecture
-        data.put("systemArch", System.getProperty("os.arch"));
+        builder.put("systemArch", System.getProperty("os.arch"));
         //System Cores
-        data.put("systemCores", Runtime.getRuntime().availableProcessors());
+        builder.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
         final double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
         final String memory;
@@ -98,16 +95,42 @@ public class Statik {
         } else {
             memory = mem + "";
         }
-        data.put("systemMemory", memory);
+        builder.put("systemMemory", memory);
 
         //Server GUID
-        data.put("serverUUID", this.getUUID());
+        builder.put("serverUUID", this.uuid);
         //Server Mod
-        data.put("serverMod", this.plugin.getServer().getVersion().split("-")[1]);
+        builder.put("serverMod", this.plugin.getServer().getName());
         //Server Mod Version
-        data.put("serverMCVersion", this.plugin.getServer().getVersion().split("MC: ")[1].replace(")", ""));
+        final String mcVersion;
+        final Matcher versionMatcher = VERSION_PATTERN.matcher(this.plugin.getServer().getVersion());
+        if (versionMatcher.find()) {
+            mcVersion = versionMatcher.group(1);
+        } else {
+            mcVersion = "unknown";
+        }
+        builder.put("serverMCVersion", mcVersion);
         //Get Auth Mode of Server
-        data.put("serverOnline", this.plugin.getServer().getOnlineMode() + "");
+        builder.put("serverOnline", this.plugin.getServer().getOnlineMode() + "");
+
+        this.unchanging = builder.build();
+    }
+
+    public void start() {
+        if (!(this.isEnabled())) {
+            this.plugin.getLogger().info(this.gson.toJson(this.collectData()));
+        }
+    }
+
+    public void postData() {
+        //TODO: Post data to report server using POST and no outside dependancies
+    }
+
+    private Map<String, Object> collectData() {
+        final Map<String, Object> data = new HashMap<String, Object>();
+
+        data.putAll(this.unchanging);
+
         //Player Count
         data.put("playerCount", this.plugin.getServer().getOnlinePlayers().length);
 
