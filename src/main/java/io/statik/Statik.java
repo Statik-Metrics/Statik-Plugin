@@ -14,7 +14,7 @@ public class Statik {
     String STATIK_VERSION = "1.0-SNAPSHOT";
 
     Plugin plugin;
-    private static final GB = 1024 * 1024 * 1024;
+    private static final int GB = 1024 * 1024 * 1024;
     
     public Statik(Plugin plugin) {
         this.plugin = plugin;
