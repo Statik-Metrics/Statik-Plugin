@@ -1,5 +1,6 @@
-package io.statik;
+package io.statik.demo;
 
+import io.statik.Statik;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

@@ -1,3 +1,4 @@
+# Temporarily running things as a plugin while developing
 name: '${project.name}'
-main: io.statik.Main
+main: io.statik.demo.Main
 version: '${project.version}'
