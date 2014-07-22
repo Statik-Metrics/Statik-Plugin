@@ -130,31 +130,31 @@ public class Statik {
      * @return config file
      */
     private File getConfigFile() {
-        File configFolder = new File(plugin.getDataFolder().getParentFile() + File.separator + "Statik");
+        final File configFolder = new File(plugin.getDataFolder().getParentFile(), "Statik");
 
         if (!configFolder.exists()) {
-            boolean success = configFolder.mkdir();
-            if (success && debug()) {
+            configFolder.mkdir();
+            if (debug()) {
                 plugin.getLogger().info("[Debug] Successfully created Statik folder");
             }
         }
 
-        File configFile = new File(configFolder, "config.yml");
+        final File configFile = new File(configFolder, "config.yml");
 
         if (!configFile.exists()) {
             try {
-                boolean success = configFile.createNewFile();
-                if (success && debug()) {
-                    plugin.getLogger().info("[Debug] Successfully created config file");
-                }
+                configFile.createNewFile();
 
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+                final YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
                 config.set("opt-out", false);
                 config.set("debug", false);
                 config.set("server-id", UUID.randomUUID().toString());
+
                 config.save(configFile);
-            } catch (Exception e) {
-                //Who wants to read this
+                if (debug()) {
+                    plugin.getLogger().info("[Debug] Successfully created config file");
+                }
+            } catch (Exception ignored) {
             }
         }
 
