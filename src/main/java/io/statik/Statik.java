@@ -15,11 +15,10 @@ public class Statik {
 
     Plugin plugin;
     private static final int GB = 1024 * 1024 * 1024;
-    
+
     public Statik(Plugin plugin) {
         this.plugin = plugin;
     }
-
 
     public void start() {
         if (!(optOut())) {
