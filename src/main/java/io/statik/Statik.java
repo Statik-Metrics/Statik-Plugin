@@ -89,11 +89,11 @@ public class Statik {
         builder.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
         final double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
-        final String memory;
-        if (mem < 1) {
-            memory = "< 1";
+        final double memory;
+        if (mem < 0) {
+            memory = 0;
         } else {
-            memory = mem + "";
+            memory = mem;
         }
         builder.put("systemMemory", memory);
 
@@ -111,13 +111,13 @@ public class Statik {
         }
         builder.put("serverMCVersion", mcVersion);
         //Get Auth Mode of Server
-        builder.put("serverOnline", this.plugin.getServer().getOnlineMode() + "");
+        builder.put("serverOnline", this.plugin.getServer().getOnlineMode());
 
         this.unchanging = builder.build();
     }
 
     public void start() {
-        if ((this.isEnabled())) {
+        if (this.isEnabled()) {
             this.plugin.getLogger().info(this.gson.toJson(this.collectData()));
         }
     }
