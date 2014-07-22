@@ -14,7 +14,8 @@ public class Statik {
     String STATIK_VERSION = "1.0-SNAPSHOT";
 
     Plugin plugin;
-
+    private static final GB = 1024 * 1024 * 1024;
+    
     public Statik(Plugin plugin) {
         this.plugin = plugin;
     }
@@ -50,7 +51,6 @@ public class Statik {
         //System Cores
         data.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        static int GB = 1024 * 1024 * 1024;
         double mem = (double)Runtime.getRuntime().maxMemory() / GB;
         String memory = null;
         if(mem < 1){
