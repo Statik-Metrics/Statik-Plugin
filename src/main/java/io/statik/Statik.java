@@ -47,27 +47,30 @@ public class Statik {
         data.put("systemOS", System.getProperty("os.name"));
         //System Architecture
         data.put("systemArch", System.getProperty("os.arch"));
-        //System Processor
-        data.put("systemCPU", "TODO");
         //System Cores
-        data.put("systemCores", Runtime.getRuntime().availableProcessors() + "");
+        data.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        data.put("systemMemory", "TODO");
+        int GB = 1024 * 1024 * 1024;
+        double mem = (double)Runtime.getRuntime().maxMemory() / GB;
+        String memory = null;
+        if(mem < 1){
+            memory = "< 1";
+        }else{
+            memory = mem + "";
+        }
+        data.put("systemMemory", memory);
 
         //Server GUID
         data.put("serverGUID", getGUID());
         //Server Mod
-        data.put("serverMod", "TODO");
+        data.put("serverMod", Bukkit.getVersion().split("-")[1]);
         //Server Mod Version
-        data.put("serverModVersion", "TODO");
-        //Get Server Location
-        data.put("serverLocation", "TODO");
-        //Get Server Software
-        data.put("serverSoftware", "TODO");
+        data.put("serverMCVersion", Bukkit.getVersion().split("MC: ")[1].replace(")", ""));
         //Get Auth Mode of Server
         data.put("serverOnline", Bukkit.getServer().getOnlineMode() + "");
         //Player Count
         data.put("playerCount", Bukkit.getOnlinePlayers().size());
+
         return data;
     }
 
