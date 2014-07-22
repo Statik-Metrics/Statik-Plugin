@@ -74,9 +74,10 @@ public class Statik {
     }
 
     /**
-     * Everything to do with configs
+     * Checks if the server owner has opted out of stat collection.
+     *
+     * @return true if the server owner has opted out
      */
-    //Checks config file to see if server owner has opted out of using metrics
     private boolean optOut() {
         FileConfiguration config = new YamlConfiguration();
 
@@ -89,7 +90,11 @@ public class Statik {
         return config.getBoolean("opt-out");
     }
 
-    //Checks config file to see if server owner has enabled debug
+    /**
+     * Checks if the server owner has enabled debugging.
+     *
+     * @return true if debugging is enabled
+     */
     private boolean debug() {
         FileConfiguration config = new YamlConfiguration();
 
@@ -102,7 +107,11 @@ public class Statik {
         return config.getBoolean("debug");
     }
 
-    //Retrieves the server's unique identifier from the config
+    /**
+     * Retrieves the server's unique identifier.
+     *
+     * @return unique identifier
+     */
     private String getGUID() {
         FileConfiguration config = new YamlConfiguration();
 
@@ -115,7 +124,11 @@ public class Statik {
         return config.getString("server-id");
     }
 
-    //Returns the configFile instance
+    /**
+     * Gets the config file.
+     *
+     * @return config file
+     */
     private File getConfigFile() {
         File configFolder = new File(plugin.getDataFolder().getParentFile() + File.separator + "Statik");
 
