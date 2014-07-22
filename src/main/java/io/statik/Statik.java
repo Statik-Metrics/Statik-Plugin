@@ -117,7 +117,7 @@ public class Statik {
     }
 
     public void start() {
-        if (!(this.isEnabled())) {
+        if ((this.isEnabled())) {
             this.plugin.getLogger().info(this.gson.toJson(this.collectData()));
         }
     }
