@@ -11,10 +11,10 @@ import java.util.UUID;
 
 public class Statik {
 
-    String STATIK_VERSION = "1.0-SNAPSHOT";
+    private static final int ONE_GIGABYTE = 1024 * 1024 * 1024;
+    private static final String STATIK_VERSION = "1.0-SNAPSHOT";
 
-    Plugin plugin;
-    private static final int GB = 1024 * 1024 * 1024;
+    private final Plugin plugin;
 
     public Statik(Plugin plugin) {
         this.plugin = plugin;
@@ -50,11 +50,11 @@ public class Statik {
         //System Cores
         data.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        double mem = (double)Runtime.getRuntime().maxMemory() / GB;
+        double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
         String memory = null;
-        if(mem < 1){
+        if (mem < 1) {
             memory = "< 1";
-        }else{
+        } else {
             memory = mem + "";
         }
         data.put("systemMemory", memory);
@@ -68,7 +68,7 @@ public class Statik {
         //Get Auth Mode of Server
         data.put("serverOnline", Bukkit.getServer().getOnlineMode() + "");
         //Player Count
-        data.put("playerCount", Bukkit.getOnlinePlayers().size());
+        data.put("playerCount", Bukkit.getOnlinePlayers().length);
 
         return data;
     }
@@ -134,7 +134,7 @@ public class Statik {
 
         if (!configFolder.exists()) {
             boolean success = configFolder.mkdir();
-            if(success && debug()){
+            if (success && debug()) {
                 plugin.getLogger().info("[Debug] Successfully created Statik folder");
             }
         }
@@ -144,7 +144,7 @@ public class Statik {
         if (!configFile.exists()) {
             try {
                 boolean success = configFile.createNewFile();
-                if(success && debug()){
+                if (success && debug()) {
                     plugin.getLogger().info("[Debug] Successfully created config file");
                 }
 
