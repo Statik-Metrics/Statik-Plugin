@@ -37,10 +37,20 @@ final class Statik_v1 extends Statik {
 
     /**
      * Package protected constructor.
+     *
+     * @param oldInstance an instance created by another plugin
      */
-    Statik_v1() {
-        this.plugins = new HashSet<Plugin>();
-        this.customTrackers = new HashMap<Plugin, Set<Statik.Custom>>();
+    @SuppressWarnings("unchecked")
+    Statik_v1(Statik oldInstance) {
+        if (oldInstance != null) {
+            Object plugins = oldInstance.getReplacementMaterial().get("plugins");
+            Object customTrackers = oldInstance.getReplacementMaterial().get("customTrackers");
+            this.plugins = (HashSet<Plugin>) plugins;
+            this.customTrackers = (HashMap<Plugin, Set<Statik.Custom>>) customTrackers;
+        } else {
+            this.plugins = new HashSet<Plugin>();
+            this.customTrackers = new HashMap<Plugin, Set<Statik.Custom>>();
+        }
     }
 
     /**
@@ -75,6 +85,17 @@ final class Statik_v1 extends Statik {
         } else {
             throw new IllegalArgumentException("Plugin '" + plugin.getName() + "' should initialize Statik before registering a Custom Tracker");
         }
+    }
+
+    /**
+     * @see Statik#getReplacementMaterial()
+     */
+    @Override
+    protected Map<String, Object> getReplacementMaterial() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("plugins", this.plugins);
+        result.put("customTrackers", this.customTrackers);
+        return result;
     }
 
     /**

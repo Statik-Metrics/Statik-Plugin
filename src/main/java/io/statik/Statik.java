@@ -41,7 +41,7 @@ public abstract class Statik {
         // Replace current instance with latest one available if needed
         if (Statik.instance == null || Statik.instance.getVersion() < i) {
             try {
-                Statik.instance = (Statik) statikClass.newInstance();
+                Statik.instance = (Statik) statikClass.getConstructor(Statik.class).newInstance(Statik.instance);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to instanciate Statik class '" + statikClass.getName() + "'");
             }
@@ -68,6 +68,14 @@ public abstract class Statik {
      * @see Statik#registerCustomTracker(Plugin, Statik.Custom)
      */
     protected abstract void _registerCustomTracker(Plugin plugin, Custom customTracker);
+
+    /**
+     * Gets everything needed to build a newer Statik instance from this
+     * older Statik instance.
+     *
+     * @return a Map of things
+     */
+    protected abstract Map<String, Object> getReplacementMaterial();
 
     /**
      * Gets the implementation's version.
