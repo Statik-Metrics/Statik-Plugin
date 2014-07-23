@@ -1,5 +1,7 @@
 package io.statik;
 
+import org.bukkit.plugin.Plugin;
+
 /**
  * First StatikClient implementation.
  */
@@ -21,7 +23,9 @@ final class Statik_v1 implements Statik.StatikClient {
     /**
      * Package protected constructor.
      */
-    Statik_v1() {}
+    Statik_v1(Plugin pluginInstance) {
+        // TODO
+    }
 
     /**
      * @see Statik.StatikClient#queue(String)
