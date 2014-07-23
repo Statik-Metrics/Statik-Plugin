@@ -1,5 +1,6 @@
-package io.statik;
+package io.statik.v1;
 
+import io.statik.Statik;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Set;
 /**
  * First StatikClient implementation.
  */
-final class Statik_v1 extends Statik {
+final class StatikImpl extends Statik {
 
     /**
      * This Statik implementation version
@@ -41,8 +42,9 @@ final class Statik_v1 extends Statik {
      * @param oldInstance an instance created by another plugin
      */
     @SuppressWarnings("unchecked")
-    Statik_v1(Statik oldInstance) {
+    StatikImpl(Statik oldInstance) {
         if (oldInstance != null) {
+            // FIXME Broken because of move to v1 package 
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
             Object customTrackers = oldInstance.getReplacementMaterial().get("customTrackers");
             this.plugins = (HashSet<Plugin>) plugins;

@@ -1,5 +1,6 @@
 package io.statik;
 
+import io.statik.v1.StatikTracker;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Map;

@@ -1,4 +1,4 @@
-package io.statik;
+package io.statik.v1;
 
 
 import java.util.Map;
