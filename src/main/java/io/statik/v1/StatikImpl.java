@@ -3,11 +3,8 @@ package io.statik.v1;
 import io.statik.Statik;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * First StatikClient implementation.
@@ -21,15 +18,20 @@ final class StatikImpl extends Statik {
 
     /**
      * This Statik implementation endpoint
-     * <p>
+     * <p/>
      * <strong>Changing this requires a version change!</strong>
      */
     private static final String STATIK_ENDPOINT = "http://report.statik.io/";
 
     /**
+     * Tracking general server-wide stuff
+     */
+    private final ServerTracker serverTracker;
+
+    /**
      * Set of all plugins registered for data collection.
      */
-    private final Set<Plugin> plugins;
+    private final Map<Plugin, PluginTracker> plugins;
 
     /**
      * <bendem> Ribesg, what If I don't want to clutter my main class and want to register another Statik.Custom?
@@ -43,14 +45,15 @@ final class StatikImpl extends Statik {
      */
     @SuppressWarnings("unchecked")
     StatikImpl(Statik oldInstance) {
+        this.serverTracker = new ServerTracker();
         if (oldInstance != null) {
             // FIXME Broken because of move to v1 package 
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
             Object customTrackers = oldInstance.getReplacementMaterial().get("customTrackers");
-            this.plugins = (HashSet<Plugin>) plugins;
+            this.plugins = (HashMap<Plugin, PluginTracker>) plugins;
             this.customTrackers = (HashMap<Plugin, Set<StatikTracker>>) customTrackers;
         } else {
-            this.plugins = new HashSet<Plugin>();
+            this.plugins = new HashMap<Plugin, PluginTracker>();
             this.customTrackers = new HashMap<Plugin, Set<StatikTracker>>();
         }
     }
@@ -60,10 +63,10 @@ final class StatikImpl extends Statik {
      */
     @Override
     protected void registerPlugin(Plugin plugin) {
-        if (this.plugins.contains(plugin)) {
+        if (this.plugins.containsKey(plugin)) {
             throw new IllegalArgumentException("Trying to register '" + plugin.getName() + "' twice");
         } else {
-            this.plugins.add(plugin);
+            this.plugins.put(plugin, new PluginTracker(plugin));
             if (plugin instanceof StatikTracker) {
                 Set<StatikTracker> customTrackersSet = new HashSet<StatikTracker>();
                 customTrackersSet.add((StatikTracker) plugin);
@@ -77,7 +80,7 @@ final class StatikImpl extends Statik {
      */
     @Override
     public void _registerCustomTracker(Plugin plugin, StatikTracker customTracker) {
-        if (this.plugins.contains(plugin)) {
+        if (this.plugins.containsKey(plugin)) {
             Set<StatikTracker> pluginTrackersSet = this.customTrackers.get(plugin);
             if (pluginTrackersSet == null) {
                 pluginTrackersSet = new HashSet<StatikTracker>();
@@ -113,14 +116,12 @@ final class StatikImpl extends Statik {
     /**
      * Collects data from plugins and send it to the report server.
      */
-    private void collectAndSend() {
-        Map<String, Object> serverDataMap = new HashMap<String, Object>();
-        // TODO Add server-related stuff: Java vserion...
+    private Map<String, Object> collect() {
+        Map<String, Object> serverDataMap = this.serverTracker.getStatikData();
 
-        Map<String, Object> pluginsDataMap = new HashMap<String, Object>();
-        for (Plugin plugin : this.plugins) {
-            Map<String, Object> pluginDataMap = new HashMap<String, Object>();
-            // TODO Add standard stuff: version...
+        List<Map<String, Object>> pluginsDataList = new ArrayList<Map<String, Object>>(this.plugins.size());
+        for (Plugin plugin : this.plugins.keySet()) {
+            Map<String, Object> pluginDataMap = this.plugins.get(plugin).getStatikData();
             Set<StatikTracker> additionalPluginTrackers = this.customTrackers.get(plugin);
             if (additionalPluginTrackers != null) {
                 Map<String, Object> pluginCustomDataMap = new HashMap<String, Object>();
@@ -141,11 +142,11 @@ final class StatikImpl extends Statik {
                 }
                 pluginDataMap.put("custom", pluginCustomDataMap);
             }
-            pluginsDataMap.put(plugin.getName(), pluginDataMap);
+            pluginsDataList.add(pluginDataMap);
         }
-        serverDataMap.put("plugins", pluginsDataMap);
+        serverDataMap.put("plugins", pluginsDataList);
 
-        this.queueJson(this.toJson(serverDataMap));
+        return serverDataMap;
     }
 
     /**
