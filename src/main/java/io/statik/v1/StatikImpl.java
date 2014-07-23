@@ -45,7 +45,7 @@ final class StatikImpl extends Statik {
      */
     @SuppressWarnings("unchecked")
     StatikImpl(Statik oldInstance) {
-        this.serverTracker = new ServerTracker();
+        this.serverTracker = new ServerTracker(this);
         if (oldInstance != null) {
             // FIXME Broken because of move to v1 package 
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
@@ -111,6 +111,15 @@ final class StatikImpl extends Statik {
     @Override
     public int getVersion() {
         return STATIK_VERSION;
+    }
+
+    /**
+     * Gets all plugins registered with Statik.
+     *
+     * @return all plugins registered with Statik
+     */
+    public Set<Plugin> getPlugins() {
+        return plugins.keySet();
     }
 
     /**
