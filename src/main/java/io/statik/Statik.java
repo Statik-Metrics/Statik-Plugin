@@ -18,6 +18,11 @@ public abstract class Statik {
      * Initializes Statik.
      */
     public static void initialize(Plugin pluginInstance) {
+        // First, see if we nope
+        if ("io.statik.Statik".equals(Statik.class.getName())) {
+            throw new IllegalStateException("Nope.");
+        }
+
         // Find latest version available
         int i = 1;
         Class<?> statikClass = null;
@@ -74,7 +79,7 @@ public abstract class Statik {
     /**
      * Bukkit Plugins should implement this interface if they want to track
      * custom data with the Statik system.
-     * <p>
+     * <p/>
      * TODO Find a better name?
      */
     public interface Custom {
