@@ -44,22 +44,6 @@ final class Statik_v1 extends Statik {
     }
 
     /**
-     * @see Statik#queueJson(String)
-     */
-    @Override
-    protected void queueJson(String jsonData) {
-        // TODO Implement method
-    }
-
-    /**
-     * @see Statik#getReportServerUrl()
-     */
-    @Override
-    protected String getReportServerUrl() {
-        return STATIK_ENDPOINT;
-    }
-
-    /**
      * This method has to be updated with each Statik update.
      *
      * @see Statik#getVersion()
@@ -67,5 +51,14 @@ final class Statik_v1 extends Statik {
     @Override
     public int getVersion() {
         return STATIK_VERSION;
+    }
+
+    /**
+     * Sends a JSON object to the Statik report server.
+     *
+     * @param jsonData the data to send to the Statik report server
+     */
+    protected void queueJson(String jsonData) {
+        // TODO Implement method
     }
 }
