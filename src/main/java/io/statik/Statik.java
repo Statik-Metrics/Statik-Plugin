@@ -2,6 +2,8 @@ package io.statik;
 
 import org.bukkit.plugin.Plugin;
 
+import java.util.Map;
+
 /**
  * TODO WIP
  */
@@ -56,4 +58,27 @@ public abstract class Statik {
      * @return the implementation's version
      */
     protected abstract int getVersion();
+
+    /**
+     * Bukkit Plugins should implement this interface if they want to track
+     * custom data with the Statik system.
+     * <p>
+     * TODO Find a better name?
+     */
+    public interface Custom {
+
+        /**
+         * TODO Correct Javadoc
+         * Should return a Map containing only the following values:
+         * - String
+         * - Double
+         * - Float
+         * - Long
+         * - Integer
+         * - Short
+         *
+         * @return a Map of custom data
+         */
+        public Map<String, Object> getCustomData();
+    }
 }
