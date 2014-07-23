@@ -19,7 +19,7 @@ public abstract class Statik {
      */
     public static void initialize(Plugin pluginInstance) {
         // First, see if we nope
-        if ("io.statik.Statik".equals(Statik.class.getName())) {
+        if (!"io.statik.Statik".equals(Statik.class.getName())) {
             throw new IllegalStateException("Nope.");
         }
 
