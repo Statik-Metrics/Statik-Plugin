@@ -1,5 +1,7 @@
 package io.statik;
 
+import org.bukkit.plugin.Plugin;
+
 /**
  * TODO WIP
  */
@@ -12,14 +14,31 @@ public final class Statik {
 
     /**
      * Initialize Statik.
-     * <p/>
-     * This method should be updated with each Statik update.
+     * TODO: do we need a plugin instance?
      */
-    public static void init() {
-        if (Statik.client == null) {
-            Statik.client = new Statik_v1();
-        } else if (Statik.client.getVersion() < Statik_v1.STATIK_VERSION) {
-            Statik.client = new Statik_v1();
+    public static void init(Plugin pluginInstance) {
+        // Find latest version available
+        int i = 0;
+        Class<?> statikClass = null;
+        while (true) {
+            try {
+                statikClass = Class.forName("Statik_v" + (i + 1));
+                i++;
+            } catch (ClassNotFoundException e) {
+                if (statikClass == null) {
+                    throw new RuntimeException("Wtf?");
+                }
+                break;
+            }
+        }
+
+        // Replace current instance with latest one available if needed
+        if (Statik.client == null || Statik.client.getVersion() < i) {
+            try {
+                Statik.client = (StatikClient) statikClass.getConstructor(Plugin.class).newInstance(pluginInstance);
+            } catch (Exception e) {
+                throw new RuntimeException("Wtf?"); // TODO
+            }
             // TODO Map old instance to the new one
         }
     }
@@ -35,25 +54,17 @@ public final class Statik {
 
     /**
      * Main interface. Every version of Statik will implement this interface.
-     * <p/>
+     * <p>
      * <strong>This interface should never change!</strong>
      */
-    private static interface StatikClient {
+    static interface StatikClient {
 
         /**
-         * Sends a JSON object to the implementation default enpoint.
+         * Sends a JSON object to the Statik report server.
          *
-         * @param jsonData the data to send to the default enpoint
+         * @param jsonData the data to send to the Statik report server
          */
         public void queue(String jsonData);
-
-        /**
-         * Sends a JSON object to the provided endpoint.
-         *
-         * @param destination the destination endpoint
-         * @param jsonData    the data to send to the destination enpoint
-         */
-        public void queue(String destination, String jsonData);
 
         /**
          * Gets the implementation's version.
@@ -61,50 +72,5 @@ public final class Statik {
          * @return the implementation's version
          */
         public int getVersion();
-    }
-
-    /**
-     * First StatikClient implementation.
-     */
-    private static final class Statik_v1 implements StatikClient {
-
-        /**
-         * This Statik implementation version
-         */
-        public static final int STATIK_VERSION = 1;
-
-        /**
-         * This Statik implementation endpoint
-         * <p/>
-         * Changing this is supported, but it would be nice not to change it.
-         * <strong>Changing this requires a version change!</strong>
-         */
-        private static final String STATIK_ENDPOINT = "http://report.statik.io/";
-
-        /**
-         * @see StatikClient#queue(String)
-         */
-        @Override
-        public void queue(String jsonData) {
-            this.queue(Statik_v1.STATIK_ENDPOINT, jsonData);
-        }
-
-        /**
-         * @see StatikClient#queue(String, String)
-         */
-        @Override
-        public void queue(String destination, String jsonData) {
-            // TODO Implement method
-        }
-
-        /**
-         * This method should be updated with each Statik update.
-         *
-         * @see StatikClient#getVersion()
-         */
-        @Override
-        public int getVersion() {
-            return 1;
-        }
     }
 }
