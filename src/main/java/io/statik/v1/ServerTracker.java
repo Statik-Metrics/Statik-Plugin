@@ -20,7 +20,7 @@ final class ServerTracker implements StatikTracker {
         this.statik = statik;
         this.lastMap = new HashMap<String, Object>();
 
-        this.serverHash = null;
+        this.serverHash = this.statik.getPlugins().iterator().next().getDataFolder().getParent();
     }
 
     @Override
@@ -58,10 +58,6 @@ final class ServerTracker implements StatikTracker {
         }
 
         //Server Hash
-        if (this.serverHash == null) {
-            // TODO Maybe change that once we have a way to get the first plugin?
-            this.serverHash = this.statik.getPlugins().iterator().next().getDataFolder().getParent();
-        }
         result.put("serverHash", this.serverHash);
 
         //Server Mod

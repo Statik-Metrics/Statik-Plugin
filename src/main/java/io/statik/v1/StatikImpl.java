@@ -44,8 +44,7 @@ final class StatikImpl extends Statik {
      * @param oldInstance an instance created by another plugin
      */
     @SuppressWarnings("unchecked")
-    StatikImpl(Statik oldInstance) {
-        this.serverTracker = new ServerTracker(this);
+    StatikImpl(Statik oldInstance, Plugin plugin) {
         if (oldInstance != null) {
             // FIXME Broken because of move to v1 package 
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
@@ -56,6 +55,8 @@ final class StatikImpl extends Statik {
             this.plugins = new HashMap<Plugin, PluginTracker>();
             this.customTrackers = new HashMap<Plugin, Set<StatikTracker>>();
         }
+        this.registerPlugin(plugin);
+        this.serverTracker = new ServerTracker(this);
     }
 
     /**
@@ -125,7 +126,7 @@ final class StatikImpl extends Statik {
     /**
      * Collects data from plugins and send it to the report server.
      */
-    private Map<String, Object> collect() {
+    Map<String, Object> collect() {
         Map<String, Object> serverDataMap = this.serverTracker.getStatikData();
 
         List<Map<String, Object>> pluginsDataList = new ArrayList<Map<String, Object>>(this.plugins.size());

@@ -18,7 +18,7 @@ public abstract class Statik {
     /**
      * Initializes Statik.
      */
-    public static void initialize(Plugin pluginInstance) {
+    public static void initialize(Plugin plugin) {
         // First, see if we nope
         if (!"io.statik.Statik".equals(Statik.class.getName())) {
             throw new IllegalStateException("Nope.");
@@ -42,13 +42,11 @@ public abstract class Statik {
         // Replace current instance with latest one available if needed
         if (Statik.instance == null || Statik.instance.getVersion() < i) {
             try {
-                Statik.instance = (Statik) statikClass.getConstructor(Statik.class).newInstance(Statik.instance);
+                Statik.instance = (Statik) statikClass.getConstructor(Statik.class, Plugin.class).newInstance(Statik.instance, plugin);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to instanciate Statik class '" + statikClass.getName() + "'");
             }
         }
-
-        Statik.instance.registerPlugin(pluginInstance);
     }
 
     /**
