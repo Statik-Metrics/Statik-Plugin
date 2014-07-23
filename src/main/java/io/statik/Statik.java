@@ -5,72 +5,71 @@ import org.bukkit.plugin.Plugin;
 /**
  * TODO WIP
  */
-public final class Statik {
+public abstract class Statik {
 
     /**
      * The current Statik instance
      */
-    private static StatikClient client;
+    private static Statik instance;
 
     /**
-     * Initialize Statik.
-     * TODO: do we need a plugin instance?
+     * Initializes Statik.
      */
-    public static void init(Plugin pluginInstance) {
+    public static void initialize(Plugin pluginInstance) {
         // Find latest version available
         int i = 0;
         Class<?> statikClass = null;
         while (true) {
             try {
-                statikClass = Class.forName("Statik_v" + (i + 1));
+                statikClass = Class.forName("io.statik.Statik_v" + (i + 1));
                 i++;
             } catch (ClassNotFoundException e) {
                 if (statikClass == null) {
-                    throw new RuntimeException("Wtf?");
+                    throw new RuntimeException("No Statik implementation found, make sure you shaded Statik correctly.");
                 }
                 break;
             }
         }
 
         // Replace current instance with latest one available if needed
-        if (Statik.client == null || Statik.client.getVersion() < i) {
+        if (Statik.instance == null || Statik.instance.getVersion() < i) {
             try {
-                Statik.client = (StatikClient) statikClass.getConstructor(Plugin.class).newInstance(pluginInstance);
+                Statik.instance = (Statik) statikClass.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Wtf?"); // TODO
+                throw new RuntimeException("Failed to instanciate Statik class '" + statikClass.getName() + "'");
             }
-            // TODO Map old instance to the new one
         }
-    }
 
-    /* TODO
-     * Add graphs and data tracking methods and stuff here
-     *   | 1) Static methods?
-     *   | 2) Static get() and non-static methods?
-     *
-     * Those methods should build a JSON 'jsonData' item then use
-     * Statik.client.queue(jsonData);
-     */
+        Statik.instance.registerPlugin(pluginInstance);
+    }
 
     /**
-     * Main interface. Every version of Statik will implement this interface.
-     * <p>
-     * <strong>This interface should never change!</strong>
+     * Sends a JSON object to the Statik report server.
+     *
+     * @param jsonData the data to send to the Statik report server
      */
-    static interface StatikClient {
-
-        /**
-         * Sends a JSON object to the Statik report server.
-         *
-         * @param jsonData the data to send to the Statik report server
-         */
-        public void queue(String jsonData);
-
-        /**
-         * Gets the implementation's version.
-         *
-         * @return the implementation's version
-         */
-        public int getVersion();
+    protected void queue(String jsonData) {
+        // TODO
     }
+
+    /**
+     * Registers the provided Plugin for data collection.
+     *
+     * @param pluginInstance a plugin instance
+     */
+    protected abstract void registerPlugin(Plugin pluginInstance);
+
+    /**
+     * Gets Statik's report server URL.
+     *
+     * @return Statik's report server URL
+     */
+    protected abstract String getReportServerUrl();
+
+    /**
+     * Gets the implementation's version.
+     *
+     * @return the implementation's version
+     */
+    protected abstract int getVersion();
 }
