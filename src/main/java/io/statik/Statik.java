@@ -17,18 +17,18 @@ public abstract class Statik {
      */
     public static void initialize(Plugin pluginInstance) {
         // Find latest version available
-        int i = 0;
+        int i = 1;
         Class<?> statikClass = null;
         while (true) {
             try {
-                statikClass = Class.forName("io.statik.Statik_v" + (i + 1));
-                i++;
+                statikClass = Class.forName("io.statik.Statik_v" + i);
             } catch (ClassNotFoundException e) {
                 if (statikClass == null) {
                     throw new RuntimeException("No Statik implementation found, make sure you shaded Statik correctly.");
                 }
                 break;
             }
+            i++;
         }
 
         // Replace current instance with latest one available if needed
