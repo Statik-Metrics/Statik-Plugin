@@ -123,7 +123,7 @@ final class Statik_v1 extends Statik {
             if (additionalPluginTrackers != null) {
                 Map<String, Object> pluginCustomDataMap = new HashMap<String, Object>();
                 for (StatikTracker customTracker : additionalPluginTrackers) {
-                    for (Entry<String, Object> e : customTracker.getCustomData().entrySet()) {
+                    for (Entry<String, Object> e : customTracker.getStatikData().entrySet()) {
                         String key = e.getKey();
                         Object value = e.getValue();
                         if (isCustomValueValid(value)) {
