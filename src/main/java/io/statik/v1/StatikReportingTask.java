@@ -36,9 +36,9 @@ final class StatikReportingTask extends BukkitRunnable {
 
     public String post(final String json) throws IOException {
         // TODO Do we compress data?
-        final URL url = new URL(null); // FIXME Should be statik.STATIK_ENDPOINT
-        final URLConnection connection = url.openConnection();
-        final byte[] data = json.getBytes();
+        URL url = new URL(null); // FIXME Should be statik.STATIK_ENDPOINT
+        URLConnection connection = url.openConnection();
+        byte[] data = json.getBytes();
 
         // Headers
         connection.addRequestProperty("User-Agent", ""); // TODO What do we put here?
@@ -49,13 +49,13 @@ final class StatikReportingTask extends BukkitRunnable {
         connection.setDoOutput(true);
 
         // Write the data
-        final OutputStream os = connection.getOutputStream();
+        OutputStream os = connection.getOutputStream();
         os.write(data);
         os.flush();
 
         // Read the response
-        final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        final String response = br.readLine();
+        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String response = br.readLine();
 
         // close resources
         os.close();
