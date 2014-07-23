@@ -79,7 +79,7 @@ public abstract class Statik {
     /**
      * Bukkit Plugins should implement this interface if they want to track
      * custom data with the Statik system.
-     * <p/>
+     * <p>
      * TODO Find a better name?
      */
     public interface Custom {
