@@ -36,7 +36,7 @@ final class StatikReportingTask extends BukkitRunnable {
 
     public String post(final String json) throws IOException {
         // TODO Do we compress data?
-        final URL url = new URL(null); // TODO Should be statik.STATIK_ENDPOINT
+        final URL url = new URL(null); // FIXME Should be statik.STATIK_ENDPOINT
         final URLConnection connection = url.openConnection();
         final byte[] data = json.getBytes();
 
