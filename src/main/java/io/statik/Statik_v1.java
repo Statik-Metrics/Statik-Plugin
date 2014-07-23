@@ -35,14 +35,15 @@ final class Statik_v1 extends Statik {
         this.plugins = new HashSet<Plugin>();
     }
 
+    /**
+     * @see Statik#registerPlugin(Plugin)
+     */
     @Override
     protected void registerPlugin(Plugin pluginInstance) {
         // TODO Implement method
     }
 
     /**
-     * This method can be updated safely with a Statik update.
-     *
      * @see Statik#queueJson(String)
      */
     @Override
@@ -51,8 +52,6 @@ final class Statik_v1 extends Statik {
     }
 
     /**
-     * This method can be updated safely with a Statik update.
-     *
      * @see Statik#getReportServerUrl()
      */
     @Override
