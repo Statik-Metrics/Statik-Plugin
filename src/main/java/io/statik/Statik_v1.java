@@ -43,6 +43,16 @@ final class Statik_v1 extends Statik {
     /**
      * This method can be updated safely with a Statik update.
      *
+     * @see Statik#queueJson(String)
+     */
+    @Override
+    protected void queueJson(String jsonData) {
+        // TODO Implement method
+    }
+
+    /**
+     * This method can be updated safely with a Statik update.
+     *
      * @see Statik#getReportServerUrl()
      */
     @Override

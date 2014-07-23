@@ -44,20 +44,18 @@ public abstract class Statik {
     }
 
     /**
-     * Sends a JSON object to the Statik report server.
-     *
-     * @param jsonData the data to send to the Statik report server
-     */
-    protected void queue(String jsonData) {
-        // TODO
-    }
-
-    /**
      * Registers the provided Plugin for data collection.
      *
      * @param pluginInstance a plugin instance
      */
     protected abstract void registerPlugin(Plugin pluginInstance);
+
+    /**
+     * Sends a JSON object to the Statik report server.
+     *
+     * @param jsonData the data to send to the Statik report server
+     */
+    protected abstract void queueJson(String jsonData);
 
     /**
      * Gets Statik's report server URL.
