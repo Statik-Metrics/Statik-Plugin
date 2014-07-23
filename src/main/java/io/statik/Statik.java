@@ -46,11 +46,23 @@ public abstract class Statik {
     }
 
     /**
+     * <bendem> Ribesg, what If I don't want to clutter my main class and want to register another Statik.Custom?
+     */
+    public static void registerCustomTracker(Plugin plugin, Statik.Custom customTracker) {
+        Statik.instance._registerCustomTracker(plugin, customTracker);
+    }
+
+    /**
      * Registers the provided Plugin for data collection.
      *
      * @param pluginInstance a plugin instance
      */
     protected abstract void registerPlugin(Plugin pluginInstance);
+
+    /**
+     * @see Statik#registerCustomTracker(Plugin, Statik.Custom)
+     */
+    protected abstract void _registerCustomTracker(Plugin plugin, Custom customTracker);
 
     /**
      * Gets the implementation's version.

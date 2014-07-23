@@ -31,18 +31,50 @@ final class Statik_v1 extends Statik {
     private final Set<Plugin> plugins;
 
     /**
+     * <bendem> Ribesg, what If I don't want to clutter my main class and want to register another Statik.Custom?
+     */
+    private final Map<Plugin, Set<Statik.Custom>> customTrackers;
+
+    /**
      * Package protected constructor.
      */
     Statik_v1() {
         this.plugins = new HashSet<Plugin>();
+        this.customTrackers = new HashMap<Plugin, Set<Statik.Custom>>();
     }
 
     /**
      * @see Statik#registerPlugin(Plugin)
      */
     @Override
-    protected void registerPlugin(Plugin pluginInstance) {
-        // TODO Implement method
+    protected void registerPlugin(Plugin plugin) {
+        if (this.plugins.contains(plugin)) {
+            throw new IllegalArgumentException("Trying to register '" + plugin.getName() + "' twice");
+        } else {
+            this.plugins.add(plugin);
+            if (plugin instanceof Statik.Custom) {
+                Set<Statik.Custom> customTrackersSet = new HashSet<Statik.Custom>();
+                customTrackersSet.add((Statik.Custom) plugin);
+                this.customTrackers.put(plugin, customTrackersSet);
+            }
+        }
+    }
+
+    /**
+     * @see Statik#registerCustomTracker(Plugin, Statik.Custom)
+     */
+    @Override
+    public void _registerCustomTracker(Plugin plugin, Custom customTracker) {
+        if (this.plugins.contains(plugin)) {
+            Set<Statik.Custom> pluginTrackersSet = this.customTrackers.get(plugin);
+            if (pluginTrackersSet == null) {
+                pluginTrackersSet = new HashSet<Statik.Custom>();
+            }
+            pluginTrackersSet.add(customTracker);
+            this.customTrackers.put(plugin, pluginTrackersSet);
+        } else {
+            throw new IllegalArgumentException("Plugin '" + plugin.getName() + "' should initialize Statik before registering a Custom Tracker");
+        }
     }
 
     /**
@@ -66,14 +98,22 @@ final class Statik_v1 extends Statik {
         for (Plugin plugin : this.plugins) {
             Map<String, Object> pluginDataMap = new HashMap<String, Object>();
             // TODO Add standard stuff: version...
-            if (plugin instanceof Statik.Custom) {
+            Set<Statik.Custom> additionalPluginTrackers = this.customTrackers.get(plugin);
+            if (additionalPluginTrackers != null) {
                 Map<String, Object> pluginCustomDataMap = new HashMap<String, Object>();
-                for (Entry<String, Object> e : ((Statik.Custom) plugin).getCustomData().entrySet()) {
-                    Object value = e.getValue();
-                    if (isCustomValueValid(value)) {
-                        pluginCustomDataMap.put(e.getKey(), value);
-                    } else {
-                        throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName());
+                for (Statik.Custom customTracker : additionalPluginTrackers) {
+                    for (Entry<String, Object> e : customTracker.getCustomData().entrySet()) {
+                        String key = e.getKey();
+                        Object value = e.getValue();
+                        if (isCustomValueValid(value)) {
+                            if (pluginCustomDataMap.containsKey(key)) {
+                                throw new IllegalArgumentException("Custom data key '" + key + "' used twice");
+                            } else {
+                                pluginCustomDataMap.put(key, value);
+                            }
+                        } else {
+                            throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName());
+                        }
                     }
                 }
                 pluginDataMap.put("custom", pluginCustomDataMap);
