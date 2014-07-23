@@ -2,6 +2,7 @@ package io.statik.v1;
 
 import org.bukkit.Bukkit;
 
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,7 +21,12 @@ final class ServerTracker implements StatikTracker {
         this.statik = statik;
         this.lastMap = new HashMap<String, Object>();
 
-        this.serverHash = this.statik.getPlugins().iterator().next().getDataFolder().getParent();
+        String pluginFolderPath = this.statik.getPlugins().iterator().next().getDataFolder().getParent();
+        try {
+            this.serverHash = new String(MessageDigest.getInstance("MD5").digest(pluginFolderPath.getBytes("UTF-8")));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to hash, please report this");
+        }
     }
 
     @Override
