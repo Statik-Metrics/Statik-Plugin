@@ -75,10 +75,8 @@ public class Statik {
         builder.put("pluginName", this.plugin.getDescription().getName());
         //Plugin Version
         builder.put("pluginVersion", this.plugin.getDescription().getVersion());
-
         //Statik Version
         builder.put("statikVersion", STATIK_VERSION);
-
         //Java Version
         builder.put("javaVersion", System.getProperty("java.version"));
         //Operating System
@@ -88,15 +86,7 @@ public class Statik {
         //System Cores
         builder.put("systemCores", Runtime.getRuntime().availableProcessors());
         //System Memory
-        final double mem = (double) Runtime.getRuntime().maxMemory() / ONE_GIGABYTE;
-        final double memory;
-        if (mem < 0) {
-            memory = 0;
-        } else {
-            memory = mem;
-        }
-        builder.put("systemMemory", memory);
-
+        builder.put("systemMemory", Runtime.getRuntime().maxMemory());
         //Server GUID
         builder.put("serverUUID", this.uuid);
         //Server Mod
