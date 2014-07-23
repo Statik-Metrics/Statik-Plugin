@@ -3,8 +3,13 @@ package io.statik.v1;
 import io.statik.Statik;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * First StatikClient implementation.
@@ -46,7 +51,7 @@ final class StatikImpl extends Statik {
     @SuppressWarnings("unchecked")
     StatikImpl(Statik oldInstance, Plugin plugin) {
         if (oldInstance != null) {
-            // FIXME Broken because of move to v1 package 
+            // FIXME Broken because of move to v1 package
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
             Object customTrackers = oldInstance.getReplacementMaterial().get("customTrackers");
             this.plugins = (HashMap<Plugin, PluginTracker>) plugins;
@@ -124,39 +129,57 @@ final class StatikImpl extends Statik {
     }
 
     /**
-     * Collects data from plugins and send it to the report server.
+     * Collects data from plugins and server send it to the report server.
      */
     Map<String, Object> collect() {
         Map<String, Object> serverDataMap = this.serverTracker.getStatikData();
 
         List<Map<String, Object>> pluginsDataList = new ArrayList<Map<String, Object>>(this.plugins.size());
         for (Plugin plugin : this.plugins.keySet()) {
+            // Add Statik collected data
             Map<String, Object> pluginDataMap = this.plugins.get(plugin).getStatikData();
-            Set<StatikTracker> additionalPluginTrackers = this.customTrackers.get(plugin);
-            if (additionalPluginTrackers != null) {
-                Map<String, Object> pluginCustomDataMap = new HashMap<String, Object>();
-                for (StatikTracker customTracker : additionalPluginTrackers) {
-                    for (Entry<String, Object> e : customTracker.getStatikData().entrySet()) {
-                        String key = e.getKey();
-                        Object value = e.getValue();
-                        if (isCustomValueValid(value)) {
-                            if (pluginCustomDataMap.containsKey(key)) {
-                                throw new IllegalArgumentException("Custom data key '" + key + "' used twice");
-                            } else {
-                                pluginCustomDataMap.put(key, value);
-                            }
-                        } else {
-                            throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName());
-                        }
-                    }
-                }
-                pluginDataMap.put("custom", pluginCustomDataMap);
+
+            // Add plugin's custom data
+            Map<String, Object> pluginData = this.collectCustomPluginData(plugin);
+            if(pluginData != null && !pluginData.isEmpty()) {
+                pluginDataMap.put("custom", pluginData);
             }
+
             pluginsDataList.add(pluginDataMap);
         }
         serverDataMap.put("plugins", pluginsDataList);
 
         return serverDataMap;
+    }
+
+    /**
+     * Collects custom data from a specified plugin
+     */
+    private Map<String, Object> collectCustomPluginData(Plugin plugin) {
+        Set<StatikTracker> pluginTrackers = this.customTrackers.get(plugin);
+        if(pluginTrackers == null) {
+            return null;
+        }
+
+        Map<String, Object> pluginData = new HashMap<String, Object>();
+        for (StatikTracker tracker : pluginTrackers) {
+            for (Entry<String, Object> e : tracker.getStatikData().entrySet()) {
+                String key = e.getKey();
+                Object value = e.getValue();
+
+                if (isCustomValueValid(value)) {
+                    if (pluginData.containsKey(key)) {
+                        plugin.getLogger().severe("[Statik] Custom data key '" + key + "' used twice");
+                    } else {
+                        pluginData.put(key, value);
+                    }
+                } else {
+                    plugin.getLogger().severe("[Statik] Invalid value type: " + value.getClass().getName());
+                }
+            }
+        }
+
+        return pluginData;
     }
 
     /**
