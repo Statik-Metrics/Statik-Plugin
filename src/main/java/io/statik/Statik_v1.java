@@ -33,7 +33,7 @@ final class Statik_v1 extends Statik {
     /**
      * <bendem> Ribesg, what If I don't want to clutter my main class and want to register another Statik.Custom?
      */
-    private final Map<Plugin, Set<Statik.Custom>> customTrackers;
+    private final Map<Plugin, Set<StatikTracker>> customTrackers;
 
     /**
      * Package protected constructor.
@@ -46,10 +46,10 @@ final class Statik_v1 extends Statik {
             Object plugins = oldInstance.getReplacementMaterial().get("plugins");
             Object customTrackers = oldInstance.getReplacementMaterial().get("customTrackers");
             this.plugins = (HashSet<Plugin>) plugins;
-            this.customTrackers = (HashMap<Plugin, Set<Statik.Custom>>) customTrackers;
+            this.customTrackers = (HashMap<Plugin, Set<StatikTracker>>) customTrackers;
         } else {
             this.plugins = new HashSet<Plugin>();
-            this.customTrackers = new HashMap<Plugin, Set<Statik.Custom>>();
+            this.customTrackers = new HashMap<Plugin, Set<StatikTracker>>();
         }
     }
 
@@ -62,23 +62,23 @@ final class Statik_v1 extends Statik {
             throw new IllegalArgumentException("Trying to register '" + plugin.getName() + "' twice");
         } else {
             this.plugins.add(plugin);
-            if (plugin instanceof Statik.Custom) {
-                Set<Statik.Custom> customTrackersSet = new HashSet<Statik.Custom>();
-                customTrackersSet.add((Statik.Custom) plugin);
+            if (plugin instanceof StatikTracker) {
+                Set<StatikTracker> customTrackersSet = new HashSet<StatikTracker>();
+                customTrackersSet.add((StatikTracker) plugin);
                 this.customTrackers.put(plugin, customTrackersSet);
             }
         }
     }
 
     /**
-     * @see Statik#registerCustomTracker(Plugin, Statik.Custom)
+     * @see Statik#registerCustomTracker(Plugin, StatikTracker)
      */
     @Override
-    public void _registerCustomTracker(Plugin plugin, Custom customTracker) {
+    public void _registerCustomTracker(Plugin plugin, StatikTracker customTracker) {
         if (this.plugins.contains(plugin)) {
-            Set<Statik.Custom> pluginTrackersSet = this.customTrackers.get(plugin);
+            Set<StatikTracker> pluginTrackersSet = this.customTrackers.get(plugin);
             if (pluginTrackersSet == null) {
-                pluginTrackersSet = new HashSet<Statik.Custom>();
+                pluginTrackersSet = new HashSet<StatikTracker>();
             }
             pluginTrackersSet.add(customTracker);
             this.customTrackers.put(plugin, pluginTrackersSet);
@@ -119,10 +119,10 @@ final class Statik_v1 extends Statik {
         for (Plugin plugin : this.plugins) {
             Map<String, Object> pluginDataMap = new HashMap<String, Object>();
             // TODO Add standard stuff: version...
-            Set<Statik.Custom> additionalPluginTrackers = this.customTrackers.get(plugin);
+            Set<StatikTracker> additionalPluginTrackers = this.customTrackers.get(plugin);
             if (additionalPluginTrackers != null) {
                 Map<String, Object> pluginCustomDataMap = new HashMap<String, Object>();
-                for (Statik.Custom customTracker : additionalPluginTrackers) {
+                for (StatikTracker customTracker : additionalPluginTrackers) {
                     for (Entry<String, Object> e : customTracker.getCustomData().entrySet()) {
                         String key = e.getKey();
                         Object value = e.getValue();

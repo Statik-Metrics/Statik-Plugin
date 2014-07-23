@@ -53,7 +53,7 @@ public abstract class Statik {
     /**
      * <bendem> Ribesg, what If I don't want to clutter my main class and want to register another Statik.Custom?
      */
-    public static void registerCustomTracker(Plugin plugin, Statik.Custom customTracker) {
+    public static void registerCustomTracker(Plugin plugin, StatikTracker customTracker) {
         Statik.instance._registerCustomTracker(plugin, customTracker);
     }
 
@@ -65,9 +65,9 @@ public abstract class Statik {
     protected abstract void registerPlugin(Plugin pluginInstance);
 
     /**
-     * @see Statik#registerCustomTracker(Plugin, Statik.Custom)
+     * @see Statik#registerCustomTracker(Plugin, StatikTracker)
      */
-    protected abstract void _registerCustomTracker(Plugin plugin, Custom customTracker);
+    protected abstract void _registerCustomTracker(Plugin plugin, StatikTracker customTracker);
 
     /**
      * Gets everything needed to build a newer Statik instance from this
@@ -83,27 +83,4 @@ public abstract class Statik {
      * @return the implementation's version
      */
     protected abstract int getVersion();
-
-    /**
-     * Bukkit Plugins should implement this interface if they want to track
-     * custom data with the Statik system.
-     * <p>
-     * TODO Find a better name?
-     */
-    public interface Custom {
-
-        /**
-         * TODO Correct Javadoc
-         * Should return a Map containing only the following values:
-         * - String
-         * - Double
-         * - Float
-         * - Long
-         * - Integer
-         * - Short
-         *
-         * @return a Map of custom data
-         */
-        public Map<String, Object> getCustomData();
-    }
 }
