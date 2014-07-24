@@ -42,7 +42,7 @@ public class StatikDataMap {
     /**
      * Checks if this map contains the provided value.
      *
-     * @param value the valule to check
+     * @param value the value to check
      * @return true if this map contaisn the provided value, false otherwise
      */
     public boolean containsValue(Object value) {
