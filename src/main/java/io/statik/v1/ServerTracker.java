@@ -30,63 +30,32 @@ final class ServerTracker implements StatikTracker {
     }
 
     @Override
-    public Map<String, Object> getStatikData() {
-        Map<String, Object> result = new HashMap<String, Object>();
+    public StatikDataMap getStatikData() {
+        StatikDataMap result = new StatikDataMap();
 
-        //Statik Version
-        if (!this.lastMap.containsKey("statikVersion")) {
-            result.put("statikVersion", this.statik.getVersion());
+        // Get all the dataz
+        result.putInt("statikVersion", this.statik.getVersion());
+        result.putString("javaVersion", System.getProperty("java.version"));
+        result.putString("systemOS", System.getProperty("os.name"));
+        result.putString("systemArch", System.getProperty("os.arch"));
+        result.putInt("systemCores", Runtime.getRuntime().availableProcessors());
+        result.putLong("systemMemory", Runtime.getRuntime().maxMemory());
+        result.putString("serverHash", this.serverHash);
+        result.putString("serverMod", Bukkit.getName());
+        result.putBoolean("serverOnline", Bukkit.getOnlineMode());
+
+        final String mcVersion;
+        final Matcher versionMatcher = VERSION_PATTERN.matcher(Bukkit.getVersion());
+        if (versionMatcher.find()) {
+            mcVersion = versionMatcher.group(1);
+        } else {
+            mcVersion = "unknown";
         }
+        result.putString("serverMCVersion", mcVersion);
 
-        //Java Version
-        if (!this.lastMap.containsKey("javaVersion")) {
-            result.put("javaVersion", System.getProperty("java.version"));
-        }
-
-        //Operating System
-        if (!this.lastMap.containsKey("systemOS")) {
-            result.put("systemOS", System.getProperty("os.name"));
-        }
-
-        //System Architecture
-        if (!this.lastMap.containsKey("systemArch")) {
-            result.put("systemArch", System.getProperty("os.arch"));
-        }
-
-        //System Cores
-        if (!this.lastMap.containsKey("systemCores")) {
-            result.put("systemCores", Runtime.getRuntime().availableProcessors());
-        }
-
-        //System Memory
-        if (!this.lastMap.containsKey("systemMemory")) {
-            result.put("systemMemory", Runtime.getRuntime().maxMemory());
-        }
-
-        //Server Hash
-        result.put("serverHash", this.serverHash);
-
-        //Server Mod
-        if (!this.lastMap.containsKey("serverMod")) {
-            result.put("serverMod", Bukkit.getName());
-        }
-
-        //Server Mod Version
-        if (!this.lastMap.containsKey("serverMCVersion")) {
-            final String mcVersion;
-            final Matcher versionMatcher = VERSION_PATTERN.matcher(Bukkit.getVersion());
-            if (versionMatcher.find()) {
-                mcVersion = versionMatcher.group(1);
-            } else {
-                mcVersion = "unknown";
-            }
-            result.put("serverMCVersion", mcVersion);
-        }
-
-        //Get Auth Mode of Server
-        result.put("serverOnline", Bukkit.getOnlineMode());
-
-        this.lastMap.putAll(result);
-        return result;
+        // Filter the result to prevent sending already known information
+        StatikDataMap finalResult = result.getFilteredMap(this.lastMap);
+        this.lastMap.putAll(result.getMap());
+        return finalResult;
     }
 }

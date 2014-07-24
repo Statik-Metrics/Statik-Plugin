@@ -1,8 +1,5 @@
 package io.statik.v1;
 
-
-import java.util.Map;
-
 /**
  * Bukkit Plugins should implement this interface if they want to track
  * custom data with the Statik system.
@@ -21,5 +18,5 @@ public interface StatikTracker {
      *
      * @return a Map of custom data
      */
-    public Map<String, Object> getStatikData();
+    public StatikDataMap getStatikData();
 }

@@ -16,12 +16,14 @@ final class PluginTracker implements StatikTracker {
     }
 
     @Override
-    public Map<String, Object> getStatikData() {
-        Map<String, Object> result = new HashMap<String, Object>();
+    public StatikDataMap getStatikData() {
+        StatikDataMap result = new StatikDataMap();
 
         // TODO Add plugin values different than in lastMap to result
 
-        this.lastMap.putAll(result);
-        return result;
+        // Filter the result to prevent sending already known information
+        StatikDataMap finalResult = result.getFilteredMap(this.lastMap);
+        this.lastMap.putAll(result.getMap());
+        return finalResult;
     }
 }

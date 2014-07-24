@@ -3,13 +3,8 @@ package io.statik.v1;
 import io.statik.Statik;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * First StatikClient implementation.
@@ -23,7 +18,7 @@ final class StatikImpl extends Statik {
 
     /**
      * This Statik implementation endpoint
-     * <p/>
+     * <p>
      * <strong>Changing this requires a version change!</strong>
      */
     private static final String STATIK_ENDPOINT = "http://report.statik.io/";
@@ -131,23 +126,23 @@ final class StatikImpl extends Statik {
     /**
      * Collects data from plugins and server send it to the report server.
      */
-    Map<String, Object> collect() {
-        Map<String, Object> serverDataMap = this.serverTracker.getStatikData();
+    StatikDataMap collect() {
+        StatikDataMap serverDataMap = this.serverTracker.getStatikData();
 
-        List<Map<String, Object>> pluginsDataList = new ArrayList<Map<String, Object>>(this.plugins.size());
+        List<StatikDataMap> pluginsDataList = new ArrayList<StatikDataMap>(this.plugins.size());
         for (Plugin plugin : this.plugins.keySet()) {
             // Add Statik collected data
-            Map<String, Object> pluginDataMap = this.plugins.get(plugin).getStatikData();
+            StatikDataMap pluginDataMap = this.plugins.get(plugin).getStatikData();
 
             // Add plugin's custom data
-            Map<String, Object> pluginData = this.collectCustomPluginData(plugin);
-            if(pluginData != null && !pluginData.isEmpty()) {
-                pluginDataMap.put("custom", pluginData);
+            StatikDataMap pluginData = this.collectCustomPluginData(plugin);
+            if (pluginData != null && !pluginData.isEmpty()) {
+                pluginDataMap.addStatikThing("_custom", pluginData);
             }
 
             pluginsDataList.add(pluginDataMap);
         }
-        serverDataMap.put("plugins", pluginsDataList);
+        serverDataMap.addStatikThing("plugins", pluginsDataList);
 
         return serverDataMap;
     }
@@ -155,66 +150,28 @@ final class StatikImpl extends Statik {
     /**
      * Collects custom data from a specified plugin
      */
-    private Map<String, Object> collectCustomPluginData(Plugin plugin) {
+    private StatikDataMap collectCustomPluginData(Plugin plugin) {
         Set<StatikTracker> pluginTrackers = this.customTrackers.get(plugin);
-        if(pluginTrackers == null) {
+        if (pluginTrackers == null) {
             return null;
         }
 
-        Map<String, Object> pluginData = new HashMap<String, Object>();
+        StatikDataMap pluginData = new StatikDataMap();
         for (StatikTracker tracker : pluginTrackers) {
-            for (Entry<String, Object> e : tracker.getStatikData().entrySet()) {
+            for (Entry<String, Object> e : tracker.getStatikData().getMap().entrySet()) {
                 String key = e.getKey();
                 Object value = e.getValue();
 
-                if (isCustomValueValid(value)) {
-                    if (pluginData.containsKey(key)) {
-                        plugin.getLogger().severe("[Statik] Custom data key '" + key + "' used twice");
-                    } else {
-                        pluginData.put(key, value);
-                    }
+                if (pluginData.containsKey(key)) {
+                    plugin.getLogger().severe("[Statik] Custom data key '" + key + "' used twice");
                 } else {
-                    plugin.getLogger().severe("[Statik] Invalid value type: " + value.getClass().getName());
+                    pluginData.put(key, value);
                 }
             }
         }
 
+        // TODO Filter custom data
+
         return pluginData;
-    }
-
-    /**
-     * Checks if a value has a Statik-accepted class.
-     *
-     * @param value the value to check
-     * @return true if the value can be sent to the report server, false
-     * otherwise
-     */
-    private boolean isCustomValueValid(Object value) {
-        return Byte.class.isInstance(value)
-                || Double.class.isInstance(value)
-                || Float.class.isInstance(value)
-                || Integer.class.isInstance(value)
-                || Long.class.isInstance(value)
-                || Short.class.isInstance(value)
-                || String.class.isInstance(value);
-    }
-
-    /**
-     * Converts a Map into a JSON object.
-     *
-     * @param dataMap a Map
-     * @return a JSON object
-     */
-    private String toJson(Map<String, Object> dataMap) {
-        return null; // TODO
-    }
-
-    /**
-     * Sends a JSON object to the Statik report server.
-     *
-     * @param jsonData the data to send to the Statik report server
-     */
-    private void queueJson(String jsonData) {
-        // TODO Implement method
     }
 }

@@ -4,6 +4,8 @@ import org.apache.commons.lang.Validate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 /**
  * Map wrapper that gives control on value types
@@ -11,15 +13,52 @@ import java.util.Map;
 public class StatikDataMap {
 
     /**
+     * Regular expression of allowed keys
+     */
+    private static final Pattern KEY_PATTERN = Pattern.compile("^[a-z0-9]+$");
+
+    /**
      * The actual map we wrap
      */
     private final Map<String, Object> map;
+
+    /**
+     * This map is used to put "plugins" array into the Server's
+     * StatikDataMap and to put "_custom" map in Plugin's StatikDataMap
+     */
+    private final Map<String, Object> statikThings;
 
     /**
      * Builds a StatikDataMap.
      */
     public StatikDataMap() {
         this.map = new HashMap<String, Object>();
+        this.statikThings = new HashMap<String, Object>();
+    }
+
+    /**
+     * Creates a map from another map.
+     *
+     * @param otherMap    the other map
+     * @param copyEntries if we need to use the other map or copy it's entries
+     */
+    private StatikDataMap(StatikDataMap otherMap, boolean copyEntries) {
+        this(otherMap.map, copyEntries);
+    }
+
+    /**
+     * Creates a map from another map.
+     *
+     * @param otherMap    the other map
+     * @param copyEntries if we need to use the other map or copy it's entries
+     */
+    private StatikDataMap(Map<String, Object> otherMap, boolean copyEntries) {
+        if (copyEntries) {
+            this.map = new HashMap<String, Object>(otherMap);
+        } else {
+            this.map = otherMap;
+        }
+        this.statikThings = new HashMap<String, Object>();
     }
 
     /**
@@ -27,6 +66,24 @@ public class StatikDataMap {
      */
     public void clear() {
         this.map.clear();
+    }
+
+    /**
+     * Checks if this map is empty.
+     *
+     * @return true if this map is empty, false otherwise
+     */
+    public boolean isEmpty() {
+        return this.map.isEmpty();
+    }
+
+    /**
+     * Gets the size of this map.
+     *
+     * @return the size of this map
+     */
+    public int size() {
+        return this.map.size();
     }
 
     /**
@@ -60,6 +117,16 @@ public class StatikDataMap {
     private <T> T get(String key, Class<T> valueType) {
         Object result = this.map.get(key);
         return result != null && valueType.isInstance(result) ? valueType.cast(result) : null;
+    }
+
+    /**
+     * Gets a value in the map.
+     *
+     * @param key the key
+     * @return the value if any, null otherwise
+     */
+    Object get(String key) {
+        return this.map.get(key);
     }
 
     /**
@@ -152,18 +219,33 @@ public class StatikDataMap {
      * @param valueType the value type
      * @param <T>       the value type
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid or key is invalid
      */
     private <T> T put(String key, T value, Class<T> valueType) {
         Validate.notNull(key, "key can't be null");
         Validate.notNull(valueType, "valueType can't be null");
-        Object previous = this.map.get(key);
-        if (previous == null || valueType.isInstance(previous)) {
-            this.map.put(key, value);
-            return valueType.cast(previous);
+        if (KEY_PATTERN.matcher(key).matches()) {
+            Object previous = this.map.get(key);
+            if (previous == null || valueType.isInstance(previous)) {
+                this.map.put(key, value);
+                return valueType.cast(previous);
+            } else {
+                throw new IllegalArgumentException("This StatikDataMap already contains a value of a different type");
+            }
         } else {
-            throw new IllegalArgumentException("This StatikDataMap already contains a value of a different type");
+            throw new IllegalArgumentException("key should match regex " + KEY_PATTERN.pattern());
         }
+    }
+
+    /**
+     * Puts a key:value pair in the map.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the old value if any, null otherwise
+     */
+    Object put(String key, Object value) {
+        return this.map.put(key, value);
     }
 
     /**
@@ -174,7 +256,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Boolean putBoolean(String key, boolean value) {
         return this.put(key, value, Boolean.class);
@@ -188,7 +270,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Byte putByte(String key, byte value) {
         return this.put(key, value, Byte.class);
@@ -202,7 +284,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Double putDouble(String key, double value) {
         return this.put(key, value, Double.class);
@@ -216,7 +298,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Float putFloat(String key, float value) {
         return this.put(key, value, Float.class);
@@ -230,7 +312,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Integer putInt(String key, int value) {
         return this.put(key, value, Integer.class);
@@ -244,7 +326,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Long putLong(String key, long value) {
         return this.put(key, value, Long.class);
@@ -258,7 +340,7 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public Short putShort(String key, short value) {
         return this.put(key, value, Short.class);
@@ -272,11 +354,30 @@ public class StatikDataMap {
      * @param key   the key
      * @param value the value
      * @return the old value if any, null otherwise
-     * @throws IllegalArgumentException if trying to replace a value of a different type
+     * @throws IllegalArgumentException if trying to replace a value of a different type or key is invalid
      */
     public String putString(String key, String value) {
         Validate.notNull(value, "Value can't be null");
         return this.put(key, value, String.class);
+    }
+
+    /**
+     * Adds a statik thing to this map.
+     *
+     * @param key   the key
+     * @param thing the thing
+     */
+    void addStatikThing(String key, Object thing) {
+        this.statikThings.put(key, thing);
+    }
+
+    /**
+     * Gets statik things of this map.
+     *
+     * @return statik things of this map
+     */
+    Map<String, Object> getStatikThings() {
+        return this.statikThings;
     }
 
     /**
@@ -286,5 +387,27 @@ public class StatikDataMap {
      */
     Map<String, Object> getMap() {
         return this.map;
+    }
+
+    /**
+     * Gets the minimal map to send to the report server, ready to be
+     * JSONified.
+     *
+     * @param lastMap a map containing all pairs "known" by the report server
+     * @return a filtered version of this map
+     */
+    StatikDataMap getFilteredMap(Map<String, Object> lastMap) {
+        if (lastMap == null || lastMap.isEmpty()) {
+            return new StatikDataMap(this, true);
+        } else {
+            Map<String, Object> result = new HashMap<String, Object>();
+            for (Entry<String, Object> entry : this.map.entrySet()) {
+                Object lastValue = lastMap.get(entry.getKey());
+                if (lastValue == null || !lastValue.equals(entry.getValue())) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return new StatikDataMap(result, false);
+        }
     }
 }

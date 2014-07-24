@@ -28,7 +28,7 @@ final class StatikReportingTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Map<String, Object> dataMap = statik.collect();
+        StatikDataMap dataMap = statik.collect();
         // TODO Json da stuff
         // TODO Send da stuff
         // TODO Some DEBUG log?
