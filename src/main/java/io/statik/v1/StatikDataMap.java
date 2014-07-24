@@ -278,4 +278,13 @@ public class StatikDataMap {
         Validate.notNull(value, "Value can't be null");
         return this.put(key, value, String.class);
     }
+
+    /**
+     * Gets the real map backing this map, ready to be JSONified.
+     *
+     * @return the real map backing this map
+     */
+    Map<String, Object> getMap() {
+        return this.map;
+    }
 }
