@@ -42,6 +42,7 @@ final class ServerTracker implements StatikTracker {
         result.putLong("systemMemory", Runtime.getRuntime().maxMemory());
         result.putString("serverMod", Bukkit.getName());
         result.putBoolean("serverOnline", Bukkit.getOnlineMode());
+        result.putInt("playerCount", Bukkit.getOnlinePlayers().length);
 
         final String mcVersion;
         final Matcher versionMatcher = VERSION_PATTERN.matcher(Bukkit.getVersion());
