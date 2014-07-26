@@ -40,7 +40,6 @@ final class ServerTracker implements StatikTracker {
         result.putString("systemArch", System.getProperty("os.arch"));
         result.putInt("systemCores", Runtime.getRuntime().availableProcessors());
         result.putLong("systemMemory", Runtime.getRuntime().maxMemory());
-        result.putString("serverHash", this.serverHash);
         result.putString("serverMod", Bukkit.getName());
         result.putBoolean("serverOnline", Bukkit.getOnlineMode());
 
@@ -55,6 +54,7 @@ final class ServerTracker implements StatikTracker {
 
         // Filter the result to prevent sending already known information
         StatikDataMap finalResult = result.getFilteredMap(this.lastMap);
+        finalResult.putString("serverHash", this.serverHash);
         this.lastMap.putAll(result.getMap());
         return finalResult;
     }
