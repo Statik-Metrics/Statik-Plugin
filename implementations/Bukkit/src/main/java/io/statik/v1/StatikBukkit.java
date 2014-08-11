@@ -17,8 +17,8 @@ public final class StatikBukkit {
     private class StatHandler extends StatikNetHandler {
         private static final int STATIK_VERSION = StatikNetHandler.STATIK_VERSION;
 
-        private StatHandler(UUID uuid) {
-            super(uuid);
+        private StatHandler() {
+            super(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
         }
 
         // Dev note: Never change existing method, only add new methods
@@ -88,7 +88,7 @@ public final class StatikBukkit {
 
         }
         if (trackerNeeded) { // No newer or equal stat handler exists
-            plugin.getServer().getServicesManager().register(Object.class, new StatHandler(UUID.fromString(plugin.getDataFolder().getParentFile().getAbsolutePath())), plugin, ServicePriority.Lowest);
+            plugin.getServer().getServicesManager().register(Object.class, new StatHandler(), plugin, ServicePriority.Lowest);
         }
         plugin.getServer().getScheduler().runTask(plugin, new Runnable() { // Wait until all plugins have run this
             @Override
@@ -113,7 +113,14 @@ public final class StatikBukkit {
                     return;
                 }
                 // Inexplicably none exist, let's register our own
-                StatikBukkit.this.plugin.getServer().getServicesManager().register(Object.class, new StatHandler(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath())), StatikBukkit.this.plugin, ServicePriority.Lowest);
+                StatHandler handler = new StatHandler();
+                try {
+                    StatikBukkit.this.statHandler = new StatHandlerAccessor(handler);
+                } catch (Throwable thrown) {
+                    // TODO Comment about how something horrible has happened
+                    return;
+                }
+                StatikBukkit.this.plugin.getServer().getServicesManager().register(Object.class, handler, StatikBukkit.this.plugin, ServicePriority.Lowest);
             }
         });
     }
