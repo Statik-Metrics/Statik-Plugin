@@ -1,5 +1,11 @@
 package io.statik.v1;
 
+import com.google.gson.Gson;
+
+import java.io.Closeable;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +68,10 @@ abstract class StatikNetHandler extends Thread {
      */
     public static final int STATIK_VERSION = 1;
 
+    private final Gson gson = new Gson();
     private final UUID uuid;
+
+    private Data data;
 
     /**
      * Creates the net handler!
@@ -75,6 +84,76 @@ abstract class StatikNetHandler extends Thread {
 
     @Override
     public final void run() {
-        // TODO stuff
+        while (!this.isInterrupted()) {
+            // TODO prepare the object
+            String currentState = this.gson.toJson(this.data);
+            Socket socket = null;
+            DataOutputStream output = null;
+            DataInputStream input = null;
+            int delay = 60000; // Default wait 60 seconds before trying after a failure
+            try {
+                /*
+                This looks like a great place to document the protocol for the moment
+
+                Client -> Server
+                    INT             Statik Version
+                    UUID            Server's directory as a UUID
+
+                Server -> Client
+                    BYTE            Status: 00000000 for 'go ahead, send data', anything else for 'DO NOT SEND'
+                    SHORT           Seconds to wait before next send
+                    STRING (opt)    If status was 'DO NOT SEND', a String message that describes why
+
+                Client -> Server
+                    STRING          JSON data yay!
+                 */
+
+                // We get signal
+                socket = new Socket("report.statik.io", 33333);
+                output = new DataOutputStream(socket.getOutputStream());
+                input = new DataInputStream(socket.getInputStream());
+
+                // Send the statik version and the server dir hash
+                output.writeInt(STATIK_VERSION);
+                output.writeLong(this.uuid.getMostSignificantBits());
+                output.writeLong(this.uuid.getLeastSignificantBits());
+                // Ensure it's actually sent before continuing
+                output.flush();
+
+                // Get le boolean
+                boolean ready = input.readBoolean();
+                // Get how long to wait before next attempt, in seconds
+                delay = input.readUnsignedShort() * 1000;
+                if (!ready) {
+                    // If not ready, tell why
+                    String error = input.readUTF();
+                    // TODO output this message
+                } else {
+                    // Send it!
+                    output.writeUTF(currentState);
+                    output.flush();
+                }
+            } catch (Exception e) {
+                // TODO log the fail would be a good idea
+            } finally {
+                this.close(output);
+                this.close(input);
+                this.close(socket);
+            }
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+
+    private void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Throwable ignored) {
+            }
+        }
     }
 }
