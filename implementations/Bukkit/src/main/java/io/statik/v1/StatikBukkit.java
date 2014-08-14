@@ -18,7 +18,7 @@ public final class StatikBukkit {
     private class StatHandler extends StatikNetHandler {
         private static final int STATIK_VERSION = StatikNetHandler.STATIK_VERSION;
 
-        private Gson gson = new Gson();
+        private final Gson gson = new Gson();
 
         private StatHandler() {
             super(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
