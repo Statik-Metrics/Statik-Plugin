@@ -1,7 +1,5 @@
 package io.statik.v1;
 
-import com.google.gson.Gson;
-
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -68,7 +66,6 @@ abstract class StatikNetHandler extends Thread {
      */
     public static final int STATIK_VERSION = 1;
 
-    private final Gson gson = new Gson();
     private final UUID uuid;
 
     private Data data;
@@ -86,7 +83,7 @@ abstract class StatikNetHandler extends Thread {
     public final void run() {
         while (!this.isInterrupted()) {
             // TODO prepare the object
-            String currentState = this.gson.toJson(this.data);
+            String currentState = this.toJson(this.data);
             Socket socket = null;
             DataOutputStream output = null;
             DataInputStream input = null;
@@ -156,4 +153,6 @@ abstract class StatikNetHandler extends Thread {
             }
         }
     }
+
+    protected abstract String toJson(Object object);
 }

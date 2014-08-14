@@ -1,5 +1,6 @@
 package io.statik.v1;
 
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
@@ -17,6 +18,8 @@ public final class StatikBukkit {
     private class StatHandler extends StatikNetHandler {
         private static final int STATIK_VERSION = StatikNetHandler.STATIK_VERSION;
 
+        private Gson gson = new Gson();
+
         private StatHandler() {
             super(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
         }
@@ -29,6 +32,11 @@ public final class StatikBukkit {
                 return false; // This is how we let you know that you screwed up.
             }
             return true;
+        }
+
+        @Override
+        protected String toJson(Object object) {
+            return this.gson.toJson(object);
         }
     }
 
