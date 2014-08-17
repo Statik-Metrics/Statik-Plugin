@@ -5,64 +5,58 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Do not modify this class.
  */
-public final class StatikBukkit {
+public final class StatikBukkit extends Statik {
     private static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";
 
     private class StatHandler extends StatikNetHandler {
         private static final int STATIK_VERSION = StatikNetHandler.STATIK_VERSION;
 
         private final Gson gson = new Gson();
+        private final Pattern versionPattern = Pattern.compile("\\(MC: ([^\\)]+)\\)");
 
         private StatHandler() {
             super(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
-        }
-
-        // Dev note: Never change existing method, only add new methods
-        public boolean add(Plugin plugin, Map<String, Object> data) {
-            try { // In case something derpy happens
-                // TODO track
-            } catch (Throwable threwItOnTheGround) { // I'm not a part of your system!
-                return false; // This is how we let you know that you screwed up.
-            }
-            return true;
         }
 
         @Override
         protected String toJson(Object object) {
             return this.gson.toJson(object);
         }
-    }
 
-    private class StatHandlerAccessor {
-        private final Method add;
-        private final Object object;
-        private final int version;
-
-        private StatHandlerAccessor(Object object) throws Throwable {
-            this.add = object.getClass().getDeclaredMethod("add", Plugin.class, Map.class);
-            this.version = (Integer) object.getClass().getDeclaredField("STATIK_VERSION").get(null);
-            this.object = object;
-        }
-
-        private void add(Plugin plugin, Map<String, Object> data) throws InvocationTargetException, IllegalAccessException {
-            this.add.invoke(this.object, plugin, data);
-        }
-
-        private int getVersion() {
-            return this.version;
+        @Override
+        protected void update(Data.Minecraft data) {
+            data.online_mode = StatikBukkit.this.plugin.getServer().getOnlineMode();
+            data.players = StatikBukkit.this.plugin.getServer().getOnlinePlayers().length;
+            final String versionString = StatikBukkit.this.plugin.getServer().getVersion();
+            final Matcher versionMatcher = this.versionPattern.matcher(versionString);
+            final String version;
+            if (versionMatcher.find()) {
+                version = versionMatcher.group(1);
+            } else {
+                version = "unknown";
+            }
+            data.version = version;
+            data.mod.name = StatikBukkit.this.plugin.getServer().getName();
+            data.mod.version = versionString;
         }
     }
 
     private final Plugin plugin;
     private StatHandlerAccessor statHandler;
 
+    /**
+     * Constructs a Statik tracking instance for your plugin. Create one
+     * instance for your plugin, or potentially miss out on data being sent!
+     *
+     * @param plugin your plugin instance
+     */
     public StatikBukkit(Plugin plugin) {
         this.plugin = plugin;
 
@@ -118,18 +112,26 @@ public final class StatikBukkit {
                     if (!thread.isAlive()) {
                         thread.start(); // Start if nobody else has
                     }
-                    return;
+                    break;
                 }
                 // Inexplicably none exist, let's register our own
-                StatHandler handler = new StatHandler();
-                try {
-                    StatikBukkit.this.statHandler = new StatHandlerAccessor(handler);
-                } catch (Throwable thrown) {
-                    // TODO Comment about how something horrible has happened
-                    return;
+                if (StatikBukkit.this.statHandler == null) {
+                    StatHandler handler = new StatHandler();
+                    try {
+                        StatikBukkit.this.statHandler = new StatHandlerAccessor(handler);
+                    } catch (Throwable thrown) {
+                        // TODO Comment about how something horrible has happened
+                        return;
+                    }
+                    StatikBukkit.this.plugin.getServer().getServicesManager().register(Object.class, handler, StatikBukkit.this.plugin, ServicePriority.Lowest);
                 }
-                StatikBukkit.this.plugin.getServer().getServicesManager().register(Object.class, handler, StatikBukkit.this.plugin, ServicePriority.Lowest);
+                StatikBukkit.this.statHandler.add();
             }
         });
+    }
+
+    @Override
+    protected String getPluginName() {
+        return this.plugin.getName();
     }
 }
