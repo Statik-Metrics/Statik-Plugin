@@ -10,7 +10,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Do not modify this class.
+ * The Bukkit implementation of the Statik metrics system.
+ * <p/>
+ * Do not modify this class. Instead, create a new instance with {@link
+ * #StatikBukkit(org.bukkit.plugin.Plugin)} and then feed it {@link
+ * io.statik.v1.Statik.Stat} instances. You can either use the existing
+ * example Stat classes, or create your own subclass of the Stat class itself
+ * if you would like something we don't offer. See the javadocs for Stat for
+ * more information on that.
  */
 public final class StatikBukkit extends Statik {
     private static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";

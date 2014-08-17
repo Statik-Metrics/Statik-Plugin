@@ -12,7 +12,35 @@ import java.util.concurrent.TimeoutException;
 public abstract class Statik {
     /**
      * The base stat class. Override however you like. Default
-     * implementations are provided for convenience.
+     * implementations are provided for convenience. Stats are fairly
+     * straightforward. They require a name, which is unique on a per-plugin
+     * basis, and a value. The value can either stay the same, or change
+     * over time. The value is polled once every 30 minutes when Statik
+     * sends its current state to the server. Here are a few example
+     * scenarios for Stat usage:
+     * <p/>
+     * Problem: You wish to record a config value loaded at startup.<br />
+     * Solution: Create and track a {@link io.statik.v1.Statik.ConstantStat}
+     * with your config value.
+     * <p/>
+     * Problem: Your plugin has two teams: RED and BLUE. You want to track
+     * the currently winning team on the server. <br />
+     * Solution 1: Create and track a {@link
+     * io.statik.v1.Statik.SettableStat} and set the winning team each time
+     * the team changes.<br />
+     * Solution 2: Write a subclass overriding Stat. For your {@link
+     * #getValue()} method implementation, return the currently winning
+     * team name. Create and track an instance of this new class.
+     * <p/>
+     * Problem: You wish to track usage of the command /meow.
+     * <br />
+     * Solution: Create and track a {@link
+     * io.statik.v1.Statik.IncrementableStat} and
+     * {@link io.statik.v1.Statik.IncrementableStat#increment()} it each
+     * time the command is called. This class automatically resets the count
+     * to 0 when the value is queried, making it perfect for tracking usage
+     * over time. Let Statik's website track totals, as your total would
+     * otherwise reset to 0 upon restart.
      */
     public abstract class Stat {
         private final String name;
@@ -40,7 +68,7 @@ public abstract class Statik {
          *
          * @return value of this stat
          */
-        public abstract Object getValue();
+        abstract Object getValue();
 
         /**
          * Gets the value, sanitized for accepted values.
@@ -82,7 +110,7 @@ public abstract class Statik {
         }
 
         @Override
-        public Object getValue() {
+        Object getValue() {
             return this.value;
         }
     }
@@ -114,7 +142,7 @@ public abstract class Statik {
         }
 
         @Override
-        public Object getValue() {
+        Object getValue() {
             return this.value;
         }
     }
@@ -138,7 +166,7 @@ public abstract class Statik {
         }
 
         @Override
-        public synchronized Object getValue() {
+        synchronized Object getValue() {
             int ret = this.value;
             this.value = 0;
             return ret;
