@@ -10,6 +10,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public abstract class StatikBase {
+    private static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";
+
+    protected class DoNotModifyStatikClasses {
+
+    }
+
+    protected abstract DoNotModifyStatikClasses doNotModifyStatik();
+
     /**
      * The base stat class. Override however you like. Default
      * implementations are provided for convenience. Stats are fairly
@@ -101,7 +109,7 @@ public abstract class StatikBase {
         /**
          * Constructs a constant stat.
          *
-         * @param name  name of this stat
+         * @param name name of this stat
          * @param value value of this stat
          */
         public ConstantStat(String name, Object value) {
@@ -124,7 +132,7 @@ public abstract class StatikBase {
         /**
          * Constructs a settable stat.
          *
-         * @param name  name of this stat
+         * @param name name of this stat
          * @param value initial value of this stat
          */
         public SettableStat(String name, Object value) {

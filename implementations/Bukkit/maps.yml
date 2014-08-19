@@ -1,0 +1,4 @@
+# This class exists solely to break plugins trying to extend classes they shouldn't.
+members:
+    "io/statik/bukkit/v1/StatikBase doNotModifyStatik ()Lio/statik/bukkit/v1/StatikBase$DoNotModifyStatikClasses;": break
+    "io/statik/bukkit/v1/StatikNetHandler doNotModifyStatik ()Lio/statik/bukkit/v1/StatikNetHandler$DoNotModifyStatikClasses;": break

@@ -22,6 +22,10 @@ import java.util.regex.Pattern;
 public final class Statik extends StatikBase {
     private static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";
 
+    protected DoNotModifyStatikClasses doNotModifyStatik() {
+        return null;
+    }
+
     private class StatHandler extends StatikNetHandler {
         private static final int STATIK_VERSION = StatikNetHandler.STATIK_VERSION;
 
@@ -52,6 +56,10 @@ public final class Statik extends StatikBase {
             data.version = version;
             data.mod.name = Statik.this.plugin.getServer().getName();
             data.mod.version = versionString;
+        }
+
+        protected StatikNetHandler.DoNotModifyStatikClasses doNotModifyStatik() {
+            return null;
         }
     }
 

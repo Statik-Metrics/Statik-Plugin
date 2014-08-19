@@ -17,6 +17,12 @@ import java.util.concurrent.Future;
 abstract class StatikNetHandler extends Thread {
     public static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";
 
+    protected class DoNotModifyStatikClasses {
+
+    }
+
+    protected abstract DoNotModifyStatikClasses doNotModifyStatik();
+
     // TODO turn this entire mess into getters/setters
     protected static class Data {
         /**
