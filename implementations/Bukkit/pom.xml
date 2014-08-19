@@ -19,6 +19,13 @@
         <relativePath>../../</relativePath>
     </parent>
 
+    <repositories>
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>io.statik</groupId>
@@ -31,6 +38,7 @@
             <artifactId>craftbukkit</artifactId>
             <version>1.7.9-R0.2</version>
             <type>jar</type>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -68,6 +76,28 @@
                     </mapping>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.statik</pattern>
+                                    <shadedPattern>io.statik.bukkit</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
