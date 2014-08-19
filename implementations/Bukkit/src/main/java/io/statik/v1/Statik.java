@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
  * The Bukkit implementation of the Statik metrics system.
  * <p/>
  * Do not modify this class. Instead, create a new instance with {@link
- * #StatikBukkit(org.bukkit.plugin.Plugin)} and then feed it {@link
- * io.statik.v1.Statik.Stat} instances. You can either use the existing
+ * #Statik(org.bukkit.plugin.Plugin)} and then feed it {@link
+ * StatikBase.Stat} instances. You can either use the existing
  * example Stat classes, or create your own subclass of the Stat class itself
  * if you would like something we don't offer. See the javadocs for Stat for
  * more information on that.
  */
-public final class StatikBukkit extends Statik {
+public final class Statik extends StatikBase {
     private static final String NOTICE = "DO NOT MODIFY THIS CLASS - MODIFICATIONS MAY RESULT STATIK.IO DELISTING";
 
     private class StatHandler extends StatikNetHandler {
@@ -29,7 +29,7 @@ public final class StatikBukkit extends Statik {
         private final Pattern versionPattern = Pattern.compile("\\(MC: ([^\\)]+)\\)");
 
         private StatHandler() {
-            super(UUID.fromString(StatikBukkit.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
+            super(UUID.fromString(Statik.this.plugin.getDataFolder().getParentFile().getAbsolutePath()));
         }
 
         @Override
@@ -39,9 +39,9 @@ public final class StatikBukkit extends Statik {
 
         @Override
         protected void update(Data.Minecraft data) {
-            data.online_mode = StatikBukkit.this.plugin.getServer().getOnlineMode();
-            data.players = StatikBukkit.this.plugin.getServer().getOnlinePlayers().length;
-            final String versionString = StatikBukkit.this.plugin.getServer().getVersion();
+            data.online_mode = Statik.this.plugin.getServer().getOnlineMode();
+            data.players = Statik.this.plugin.getServer().getOnlinePlayers().length;
+            final String versionString = Statik.this.plugin.getServer().getVersion();
             final Matcher versionMatcher = this.versionPattern.matcher(versionString);
             final String version;
             if (versionMatcher.find()) {
@@ -50,7 +50,7 @@ public final class StatikBukkit extends Statik {
                 version = "unknown";
             }
             data.version = version;
-            data.mod.name = StatikBukkit.this.plugin.getServer().getName();
+            data.mod.name = Statik.this.plugin.getServer().getName();
             data.mod.version = versionString;
         }
     }
@@ -64,7 +64,7 @@ public final class StatikBukkit extends Statik {
      *
      * @param plugin your plugin instance
      */
-    public StatikBukkit(Plugin plugin) {
+    public Statik(Plugin plugin) {
         this.plugin = plugin;
 
         // Tracker registration
@@ -102,7 +102,7 @@ public final class StatikBukkit extends Statik {
         plugin.getServer().getScheduler().runTask(plugin, new Runnable() { // Wait until all plugins have run this
             @Override
             public void run() {
-                for (RegisteredServiceProvider<Object> provider : StatikBukkit.this.plugin.getServer().getServicesManager().getRegistrations(Object.class)) {
+                for (RegisteredServiceProvider<Object> provider : Statik.this.plugin.getServer().getServicesManager().getRegistrations(Object.class)) {
                     Object object = provider.getProvider();
                     if (!(object instanceof Thread)) { // Not a thread? Go away, you're not the stat handler!
                         continue;
@@ -114,7 +114,7 @@ public final class StatikBukkit extends Statik {
                     } catch (Throwable thrown) {
                         continue;
                     }
-                    StatikBukkit.this.statHandler = accessor;
+                    Statik.this.statHandler = accessor;
                     Thread thread = (Thread) object;
                     if (!thread.isAlive()) {
                         thread.start(); // Start if nobody else has
@@ -122,17 +122,17 @@ public final class StatikBukkit extends Statik {
                     break;
                 }
                 // Inexplicably none exist, let's register our own
-                if (StatikBukkit.this.statHandler == null) {
+                if (Statik.this.statHandler == null) {
                     StatHandler handler = new StatHandler();
                     try {
-                        StatikBukkit.this.statHandler = new StatHandlerAccessor(handler);
+                        Statik.this.statHandler = new StatHandlerAccessor(handler);
                     } catch (Throwable thrown) {
                         // TODO Comment about how something horrible has happened
                         return;
                     }
-                    StatikBukkit.this.plugin.getServer().getServicesManager().register(Object.class, handler, StatikBukkit.this.plugin, ServicePriority.Lowest);
+                    Statik.this.plugin.getServer().getServicesManager().register(Object.class, handler, Statik.this.plugin, ServicePriority.Lowest);
                 }
-                StatikBukkit.this.statHandler.add();
+                Statik.this.statHandler.add();
             }
         });
     }

@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public abstract class Statik {
+public abstract class StatikBase {
     /**
      * The base stat class. Override however you like. Default
      * implementations are provided for convenience. Stats are fairly
@@ -20,13 +20,13 @@ public abstract class Statik {
      * scenarios for Stat usage:
      * <p/>
      * Problem: You wish to record a config value loaded at startup.<br />
-     * Solution: Create and track a {@link io.statik.v1.Statik.ConstantStat}
+     * Solution: Create and track a {@link StatikBase.ConstantStat}
      * with your config value.
      * <p/>
      * Problem: Your plugin has two teams: RED and BLUE. You want to track
      * the currently winning team on the server. <br />
      * Solution 1: Create and track a {@link
-     * io.statik.v1.Statik.SettableStat} and set the winning team each time
+     * StatikBase.SettableStat} and set the winning team each time
      * the team changes.<br />
      * Solution 2: Write a subclass overriding Stat. For your {@link
      * #getValue()} method implementation, return the currently winning
@@ -35,8 +35,8 @@ public abstract class Statik {
      * Problem: You wish to track usage of the command /meow.
      * <br />
      * Solution: Create and track a {@link
-     * io.statik.v1.Statik.IncrementableStat} and
-     * {@link io.statik.v1.Statik.IncrementableStat#increment()} it each
+     * StatikBase.IncrementableStat} and
+     * {@link StatikBase.IncrementableStat#increment()} it each
      * time the command is called. This class automatically resets the count
      * to 0 when the value is queried, making it perfect for tracking usage
      * over time. Let Statik's website track totals, as your total would
@@ -191,7 +191,7 @@ public abstract class Statik {
         @Override
         public Map<String, Object> get() throws InterruptedException, ExecutionException {
             final Map<String, Object> map = new HashMap<String, Object>();
-            for (Stat stat : Statik.this.stats.values()) {
+            for (Stat stat : StatikBase.this.stats.values()) {
                 map.put(stat.getName(), stat.getVal());
             }
             return map;
@@ -231,7 +231,7 @@ public abstract class Statik {
 
         protected void add() {
             try {
-                this.add.invoke(this.object, Statik.this.getPluginName(), new StatikFuture());
+                this.add.invoke(this.object, StatikBase.this.getPluginName(), new StatikFuture());
             } catch (Exception ignored) {
                 // If this fails, all is lost anyhow
             }
